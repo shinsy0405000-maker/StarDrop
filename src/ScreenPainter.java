@@ -30,15 +30,9 @@ abstract class ScreenPainter extends WorldPainter {
         viewX = (w - Rules.W * viewScale) / 2;
         viewY = (h - Rules.H * viewScale) / 2;
 
-        if (background == null || backgroundFor != level || backgroundW != w || backgroundH != h) {
-            background = makeBackground(g, w, h);
-            backgroundFor = level;
-            backgroundW = w;
-            backgroundH = h;
-        }
-        g.setTransform(new AffineTransform());
-        g.drawImage(background, (int) Math.round(base.getTranslateX()), (int) Math.round(base.getTranslateY()), null);
-        g.setTransform(base);
+        // 배경은 구역, 창 크기, 윈도우 배율이 바뀔 때만 새로 그린다
+        double dev = ImageCache.deviceScale(g);
+        ImageCache.drawScreenLayer(g, background.get(() -> makeBackground(g, w, h), level, w, h, dev));
 
         List<Widget> next = new ArrayList<>();
         if (level != null) {
@@ -49,7 +43,15 @@ abstract class ScreenPainter extends WorldPainter {
             g.setTransform(base);
             if (!demo && state != LOADING) drawHud(g, w, h, next);
         }
-        if (titleOpen) drawTitle(g, w, h, next);
+        if (titleOpen) {
+            // 처음 화면은 움직이지 않으므로 통째로 한 장 그려 두고 붙이기만 한다 (버튼만 매번 그린다)
+            BufferedImage layer = titleLayer.get(() -> {
+                titleButtons = new ArrayList<>();
+                return ImageCache.screenLayer(g, w, h, true, lg -> drawTitle(lg, w, h, titleButtons));
+            }, w, h, dev);
+            ImageCache.drawScreenLayer(g, layer);
+            next.addAll(titleButtons);
+        }
         if (levelsOpen) drawLevels(g, w, h, next);
         if (state == WIN && !demo) drawReceipt(g, w, h, next);
         if (state == LOADING) drawBusy(g, w, h);
@@ -217,26 +219,23 @@ abstract class ScreenPainter extends WorldPainter {
         }
     }
 
-    /** 제목 글자의 빛 번짐: 작게 그렸다가 크게 늘리면 흐려지는 원리 */
+    /** 제목 글자의 빛 번짐: 작게 그렸다가 크게 늘리면 흐려지는 원리 (처음 화면 그림을 만들 때 한 번만 불린다) */
     protected void drawTitleGlow(Graphics2D g, double x, double line1, double line2, Font f, double size) {
         int pad = (int) (size * 0.6), down = 12;
         double textW = Math.max(Ui.width(g, "별똥", f), Ui.width(g, "택배", f));
         int iw = (int) ((textW + pad * 2) / down) + 2, ih = (int) ((line2 - line1 + size + pad * 2) / down) + 2;
-        if (titleGlow == null || titleGlowSize != size) {
-            titleGlow = new BufferedImage(iw, ih, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D tg = titleGlow.createGraphics();
-            tg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            tg.scale(1.0 / down, 1.0 / down);
-            tg.setFont(f);
-            tg.setColor(new Color(255, 170, 60, 90));
-            tg.drawString("별똥", pad, (float) (pad + size * 0.8));
-            tg.drawString("택배", pad, (float) (pad + size * 0.8 + (line2 - line1)));
-            tg.dispose();
-            titleGlowSize = size;
-        }
+        BufferedImage small = new BufferedImage(iw, ih, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D tg = small.createGraphics();
+        tg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        tg.scale(1.0 / down, 1.0 / down);
+        tg.setFont(f);
+        tg.setColor(new Color(255, 170, 60, 90));
+        tg.drawString("별똥", pad, (float) (pad + size * 0.8));
+        tg.drawString("택배", pad, (float) (pad + size * 0.8 + (line2 - line1)));
+        tg.dispose();
         Object hint = g.getRenderingHint(RenderingHints.KEY_INTERPOLATION);
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g.drawImage(titleGlow, (int) (x - pad), (int) (line1 - size * 0.8 - pad), iw * down, ih * down, null);
+        g.drawImage(small, (int) (x - pad), (int) (line1 - size * 0.8 - pad), iw * down, ih * down, null);
         if (hint != null) g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
     }
 

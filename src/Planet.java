@@ -22,8 +22,7 @@ class Planet extends GravityBody {
     private final double radius;
     private final long lookSeed;     // 겉모습을 정하는 난수 씨앗
     private BufferedImage sprite;    // 처음 그릴 때 한 번만 만드는 원본 그림
-    private BufferedImage scaled;    // 지금 창 크기에 맞게 줄여 둔 그림 (매 프레임 확대/축소하면 느리다)
-    private double scaledFor;
+    private final CachedImage scaled = new CachedImage();   // 지금 창 크기에 맞게 줄여 둔 그림 (매 프레임 확대/축소하면 느리다)
     private double spriteHalf;
 
     Planet(double x, double y, double radius, long lookSeed) {
@@ -40,19 +39,22 @@ class Planet extends GravityBody {
         if (sprite == null) sprite = makeSprite();
         AffineTransform world = g.getTransform();
         double s = world.getScaleX();
-        if (scaled == null || Math.abs(s - scaledFor) > 1e-6) {
-            int px = Math.max(2, (int) Math.round(spriteHalf * 2 * s));
-            scaled = Paints.newImage(g, px, px, true);
-            Graphics2D sg = scaled.createGraphics();
-            sg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            sg.drawImage(sprite, 0, 0, px, px, null);
-            sg.dispose();
-            scaledFor = s;
-        }
+        int px = Math.max(2, (int) Math.round(spriteHalf * 2 * s));
+        BufferedImage img = scaled.get(() -> shrink(g, px), px);     // 화면 크기가 바뀔 때만 다시 줄인다
         Point2D corner = world.transform(new Point2D.Double(getX() - spriteHalf, getY() - spriteHalf), null);
         g.setTransform(new AffineTransform());      // 화면 픽셀 그대로 그린다
-        g.drawImage(scaled, (int) Math.round(corner.getX()), (int) Math.round(corner.getY()), null);
+        g.drawImage(img, (int) Math.round(corner.getX()), (int) Math.round(corner.getY()), null);
         g.setTransform(world);
+    }
+
+    /** 원본 그림을 화면 크기(px × px)로 부드럽게 줄인 그림 */
+    private BufferedImage shrink(Graphics2D screen, int px) {
+        BufferedImage img = ImageCache.newImage(screen, px, px, true);
+        Graphics2D sg = img.createGraphics();
+        sg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        sg.drawImage(sprite, 0, 0, px, px, null);
+        sg.dispose();
+        return img;
     }
 
     private BufferedImage makeSprite() {

@@ -24,19 +24,14 @@ abstract class WorldPainter extends GameState {
      * 웹처럼 게임 세계 바깥 여백까지 채우므로 창 비율이 달라도 검은 띠가 생기지 않는다.
      */
     protected BufferedImage makeBackground(Graphics2D screen, int w, int h) {
-        double dev = screen.getTransform().getScaleX();          // 윈도우 배율(125%, 150% 등)
-        int pw = Math.max(2, (int) Math.ceil(w * dev)), ph = Math.max(2, (int) Math.ceil(h * dev));
-        BufferedImage img = Paints.newImage(screen, pw, ph, false);
-        Graphics2D g = img.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setPaint(new java.awt.LinearGradientPaint(0, 0, pw * 0.3f, ph, new float[]{0f, 0.55f, 1f},
+        return ImageCache.screenLayer(screen, w, h, false, g -> paintBackground(g, w, h));
+    }
+
+    private void paintBackground(Graphics2D g, int w, int h) {
+        g.setPaint(new java.awt.LinearGradientPaint(0, 0, w * 0.3f, h, new float[]{0f, 0.55f, 1f},
                 new Color[]{new Color(6, 7, 22), new Color(10, 9, 32), new Color(19, 10, 36)}));
-        g.fillRect(0, 0, pw, ph);
-        if (level == null) {
-            g.dispose();
-            return img;
-        }
-        g.scale(dev, dev);
+        g.fillRect(0, 0, w, h);
+        if (level == null) return;
         g.translate(viewX, viewY);
         g.scale(viewScale, viewScale);
         double vx0 = -viewX / viewScale, vy0 = -viewY / viewScale, vw = w / viewScale, vh = h / viewScale;
@@ -76,8 +71,6 @@ abstract class WorldPainter extends GameState {
             }
             g.draw(line);
         }
-        g.dispose();
-        return img;
     }
 
     protected static void warp(Level lv, double x, double y, double[] out) {

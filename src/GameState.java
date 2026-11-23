@@ -1,6 +1,5 @@
 import javax.swing.JPanel;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -55,11 +54,10 @@ abstract class GameState extends JPanel {
     protected int previewEnd;
     protected final transient List<Particle> particles = new ArrayList<>();
     protected final transient List<Object[]> floaters = new ArrayList<>();   // 떠오르는 글자 {글, x, y, 남은 시간, 색}
-    protected transient BufferedImage background;                            // 지금 창 크기로 그려 둔 배경
-    protected transient Level backgroundFor;
-    protected int backgroundW, backgroundH;
-    protected transient BufferedImage titleGlow;
-    protected double titleGlowSize;
+    // 미리 그려 두는 그림 (CachedImage: 창 크기나 구역이 바뀔 때만 새로 그린다)
+    protected final transient CachedImage background = new CachedImage();   // 배경: 성운, 별, 휘어진 격자
+    protected final transient CachedImage titleLayer = new CachedImage();   // 처음 화면: 그라데이션, 제목, 설명, 조작 안내
+    protected transient List<Widget> titleButtons = new ArrayList<>();      // 처음 화면 그림을 만들 때 같이 만든 버튼들
     protected final double[][] twinkles = new double[110][4];
     protected double anim, shake;
     protected long lastNanos = System.nanoTime();

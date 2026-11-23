@@ -1,15 +1,9 @@
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.RadialGradientPaint;
-import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
-import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.Map;
 
-/** 그리기 도우미: HSL 색, 빛 번짐, 원 그리기 */
+/** 그리기 도우미: HSL 색, 빛 번짐, 원 그리기 (미리 그려 두는 그림은 ImageCache) */
 final class Paints {
     private Paints() { }
 
@@ -31,34 +25,10 @@ final class Paints {
 
     /** 가운데가 밝고 가장자리로 갈수록 투명해지는 빛 */
     static void glow(Graphics2D g, double x, double y, double radius, Color color) {
-        // 그라데이션을 매 프레임 새로 계산하면 느리므로, 색마다 한 번만 그려 두고 크기만 바꿔 쓴다
-        BufferedImage img = GLOWS.get(color.getRGB());
-        if (img == null) {
-            img = newImage(g, GLOW_SIZE, GLOW_SIZE, true);
-            Graphics2D ig = img.createGraphics();
-            Color clear = new Color(color.getRed(), color.getGreen(), color.getBlue(), 0);
-            ig.setPaint(new RadialGradientPaint(GLOW_SIZE / 2f, GLOW_SIZE / 2f, GLOW_SIZE / 2f, new float[]{0f, 1f}, new Color[]{color, clear}));
-            ig.fillRect(0, 0, GLOW_SIZE, GLOW_SIZE);
-            ig.dispose();
-            GLOWS.put(color.getRGB(), img);
-        }
-        AffineTransform at = AffineTransform.getTranslateInstance(x - radius, y - radius);
-        at.scale(radius * 2 / GLOW_SIZE, radius * 2 / GLOW_SIZE);
-        g.drawImage(img, at, null);
-    }
-
-    private static final int GLOW_SIZE = 128;
-    private static final Map<Integer, BufferedImage> GLOWS = new HashMap<>();
-
-    /** 그래픽 카드가 빠르게 그릴 수 있는 형식의 빈 그림 만들기 */
-    static BufferedImage newImage(Graphics2D g, int w, int h, boolean transparent) {
-        GraphicsConfiguration gc = g.getDeviceConfiguration();
-        try {
-            if (gc != null) return gc.createCompatibleImage(w, h, transparent ? Transparency.TRANSLUCENT : Transparency.OPAQUE);
-        } catch (RuntimeException e) {
-            // 아래의 기본 형식으로 만든다
-        }
-        return new BufferedImage(w, h, transparent ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
+        // 그라데이션을 매 프레임 새로 계산하면 느리므로, 색마다 한 번만 그려 둔 그림(ImageCache)을 크기만 바꿔 쓴다
+        double k = radius * 2 / ImageCache.GLOW_SIZE;
+        AffineTransform at = new AffineTransform(k, 0, 0, k, x - radius, y - radius);
+        g.drawImage(ImageCache.glow(g, color), at, null);
     }
 
     static void circle(Graphics2D g, double x, double y, double r) {
