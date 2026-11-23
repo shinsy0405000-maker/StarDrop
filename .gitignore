@@ -1,0 +1,10 @@
+# IntelliJ
+.idea/
+out/
+
+# 컴파일 결과
+*.class
+
+# 운영체제
+.DS_Store
+Thumbs.db
