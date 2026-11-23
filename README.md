@@ -10,11 +10,11 @@
 JDK 21 이상이 필요합니다.
 
 ```
-javac -encoding UTF-8 src/StarDrop.java -d out
+javac -encoding UTF-8 -d out src/*.java
 java -cp out StarDrop
 ```
 
-IntelliJ IDEA에서는 이 폴더를 열고 `src/StarDrop.java`의 `main`을 실행하면 됩니다.
+IntelliJ IDEA에서는 이 폴더를 열고 `src/StarDrop.java`의 `main`을 실행하면 됩니다. 나머지 파일은 자동으로 같이 컴파일됩니다.
 실행 구성의 JDK가 프로젝트 SDK와 같은지 확인하세요. 버전이 다르면 `UnsupportedClassVersionError`가 납니다.
 
 ## 조작
@@ -59,16 +59,41 @@ IntelliJ IDEA에서는 이 폴더를 열고 `src/StarDrop.java`의 `main`을 실
 | 인터페이스 | `Drawable`: 화면에 그릴 대상을 반복문 하나로 그림 |
 | 상속 | `GravityBody`(추상 클래스) ← `Planet`, `BlackHole`, `Repulsor` |
 | 상속 | `Widget`(추상 클래스) ← `Button`, `LevelTile`: 화면 위의 클릭할 수 있는 요소 |
+| 상속 | `GameState` ← `WorldPainter` ← `ScreenPainter` ← `StarDrop`: 게임 본체를 상태, 우주 그리기, UI 그리기, 진행·입력 네 층으로 나눔 |
 | 상속 | `MouseAdapter`, `KeyAdapter`를 상속해 필요한 메서드만 재정의 |
 
 ## 폴더 구성
 
 ```
-src/StarDrop.java   자바 버전 (게임 전체)
-web/index.html      처음에 만든 웹 버전 (브라우저로 열면 실행, 16개 구역)
+src/
+  StarDrop.java        게임 진행, 물리 한 스텝, 입력, main  ← 여기서 실행
+  ScreenPainter.java   화면 위 UI 그리기 (HUD, 처음 화면, 구역 목록, 영수증)
+  WorldPainter.java    우주 화면 그리기 (배경, 천체, 별, 조준선, 소포)
+  GameState.java       게임 상태 변수
+
+  Ship.java            날아가는 소포 (가속도 → 속도 → 위치)
+  Level.java           구역 하나
+  LevelConfig.java     구역에 무엇을 몇 개 넣을지
+  LevelGenerator.java  구역 자동 생성
+  Solver.java          자동 풀이기 (완전 탐색)
+  Rules.java           게임 규칙 숫자
+
+  CelestialBody.java   중력을 가진 천체 (인터페이스)
+  GravityBody.java     제자리 천체의 공통 부모 (만유인력 계산)
+  Planet.java  BlackHole.java  Repulsor.java  Moon.java  Wormhole.java
+
+  Drawable.java        화면에 그릴 수 있는 것 (인터페이스)
+  Widget.java  Button.java  LevelTile.java   클릭할 수 있는 화면 요소
+  Ui.java  Paints.java  Particle.java  Sound.java   글자·색·그리기 도우미, 불꽃, 소리
+web/index.html         처음에 만든 웹 버전 (브라우저로 열면 실행, 16개 구역)
 ```
 
 ## 개발 로그
+
+### 2026-11-23 — 파일 나누기
+- 한 파일(약 2,500줄)이던 자바 코드를 클래스마다 한 파일씩, 25개 파일로 나눔
+- 1,100줄이 넘던 게임 본체 `StarDrop`을 상속으로 네 층으로 나눔: `GameState`(상태) ← `WorldPainter`(우주 그리기) ← `ScreenPainter`(UI 그리기) ← `StarDrop`(진행·입력·main). 가장 긴 파일이 530줄
+- 동작은 그대로: 나누기 전과 같은 화면이 픽셀 단위로 똑같이 그려지고, 5개 구역 풀이·방향키·소리 시험 결과도 같음
 
 ### 2026-11-20 — 방향키 동시 입력
 - 방향키를 여러 개 동시에 누를 수 있게 함 (예: 왼쪽+위로 각도와 세기를 함께 조정). 전에는 운영체제 키 반복에 맡겨서 마지막에 누른 키만 움직였음
