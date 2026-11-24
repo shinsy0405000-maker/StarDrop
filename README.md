@@ -26,7 +26,7 @@
 게임 처음 화면 오른쪽 위나 구역 목록의 **후원하기** 버튼을 누르면 후원 창이 열립니다.
 5,000원 / 10,000원 / 30,000원 중에서 고르거나 직접 적을 수 있고, **최소 금액은 5,000원**입니다.
 후원은 **카카오페이 송금코드**로 받습니다. 금액을 고르면 창에 QR이 나오고, 휴대폰 카메라나 카카오톡으로 찍으면 카카오페이 송금 화면이 열립니다.
-휴대폰에서 바로 후원하려면 → [카카오페이로 후원하기](https://qr.kakaopay.com/FVVslcpd2) (카카오톡이 깔린 휴대폰에서 열어 주세요)
+게임 없이 후원하려면 → **[후원 페이지 (DONATE.md)](DONATE.md)** 에서 QR을 찍어 주세요. 저장소 위쪽 **Sponsor** 버튼으로도 갈 수 있어요.
 
 ## 직접 빌드해서 실행하기
 
@@ -123,11 +123,18 @@ src/
   QrCode.java          QR 코드 만들기 (라이브러리 없이 직접 구현)
   fonts/               웹과 같은 글꼴 (Black Han Sans, IBM Plex Sans KR, IBM Plex Mono — SIL Open Font License, OFL-*.txt)
 .github/ISSUE_TEMPLATE/bug_report.yml   GitHub 버그 제보 양식
+.github/FUNDING.yml                    저장소 Sponsor 버튼 → 후원 페이지
+DONATE.md              후원 페이지 (카카오페이 송금 QR)
 .github/workflows/release.yml          배포: Release를 발행하면 jar와 윈도우 실행 파일을 자동으로 만듦
 web/index.html         처음에 만든 웹 버전 (브라우저로 열면 실행, 16개 구역)
 ```
 
 ## 개발 로그
+
+### 2026-11-24 — GitHub 후원 페이지
+- **후원 페이지** [`DONATE.md`](DONATE.md): 게임을 안 받아도 GitHub에서 바로 후원할 수 있게 QR과 방법을 정리
+  - QR 그림(`.github/donate-qr.png`)은 게임 속 `QrCode`로 만들고, QR 리더로 링크가 그대로 읽히는지 확인함
+  - 저장소 위쪽 **Sponsor** 버튼이 카카오페이 링크(PC에선 404) 대신 이 페이지로 가게 바꿈 (`.github/FUNDING.yml`)
 
 ### 2026-11-24 — 1.1.0 배포, 후원 창
 - **v1.1.0 배포**: 후원 창이 들어간 버전 (`Rules.VERSION = "1.1.0"`)
@@ -139,7 +146,6 @@ web/index.html         처음에 만든 웹 버전 (브라우저로 열면 실�
   - PC 브라우저로 송금코드 주소를 열면 카카오페이가 404를 보여 줘서 "링크 열기" 버튼은 뺌
   - QR은 라이브러리 없이 `QrCode`에서 직접 만듦 (바이트 모드, 오류 정정 M, 버전 1~10). 1~213글자 전부 QR 리더로 읽히는지 확인함
   - 송금코드 링크는 `Donate.KAKAOPAY_LINK` 한 줄에만 적으면 됨. 비어 있으면 "후원 링크 준비 중"으로 보임
-  - GitHub 저장소 위쪽 **Sponsor** 버튼에도 같은 링크를 걸어 둠 (`.github/FUNDING.yml`)
   - 최소 금액을 10,000원 → 5,000원으로 낮춤 (`Donate.MIN_AMOUNT` 한 줄, 안내 문구도 이 값을 따라감)
 
 ### 2026-11-24 — 1.0.0 배포, 버그 제보
