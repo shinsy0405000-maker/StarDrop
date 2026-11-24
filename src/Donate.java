@@ -18,13 +18,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.StringSelection;
-import java.net.URI;
 
 /**
  * 후원 창 (카카오페이 송금코드).
@@ -34,14 +32,15 @@ import java.net.URI;
  * 5,000원보다 적은 금액을 고르면 QR이 나오지 않는다.
  *
  * 카카오페이 송금은 휴대폰 카카오톡 안에서만 되기 때문에, PC 게임에서는 QR을 보여 주는 게 가장 편하다.
- * (링크 열기 / 링크 복사 버튼도 같이 둔다)
+ * PC 브라우저로 이 주소를 열면 카카오페이가 404(없는 페이지)를 보여 줘서 "링크 열기" 버튼은 두지 않는다.
+ * 대신 "링크 복사" 버튼으로 휴대폰에 보내서 열 수 있게 한다.
  * 송금코드 링크가 아직 없으면 KAKAOPAY_LINK 를 비워 두고, 생기면 이 한 줄만 바꾸면 된다.
  */
 final class Donate {
     private Donate() { }
 
     /** 카카오페이 송금코드 링크 (https://qr.kakaopay.com/... 전체, 또는 / 뒤의 코드만). 비어 있으면 "준비 중" */
-    static final String KAKAOPAY_LINK = "";
+    static final String KAKAOPAY_LINK = "https://qr.kakaopay.com/FVVslcpd2";
 
     static final int MIN_AMOUNT = 5_000;           // 최소 후원 금액(원)
     static final int MAX_AMOUNT = 10_000_000;      // 잘못 입력한 큰 숫자를 막기 위한 한도
@@ -135,7 +134,7 @@ final class Donate {
                 Ui.font(13, Font.PLAIN, false, 0), Ui.SOFT_INK);
         body.add(hint);
 
-        JButton openLink = button("링크 열기", true), copy = button("링크 복사", false), close = button("닫기", false);
+        JButton copy = button("링크 복사", true), close = button("닫기", false);
 
         // 지금 고른 금액 (-1 = 아직 고르지 않음)
         int[] amount = {PRESETS[0]};
@@ -151,7 +150,6 @@ final class Donate {
             boolean show = ready() && problem == null;
             qr.setIcon(show ? qrIcon : null);
             qr.setText(show ? "" : ready() ? "금액을 먼저 골라 주세요" : "후원 링크 준비 중");
-            openLink.setEnabled(show);
             copy.setEnabled(show);
         };
         for (int i = 0; i <= PRESETS.length; i++) {
@@ -176,17 +174,8 @@ final class Donate {
         choices[0].setSelected(true);
         refresh.run();
 
-        openLink.addActionListener(e -> {
-            if (check(amount[0]) != null || !ready()) return;     // 버튼이 꺼져 있어야 하지만 한 번 더 확인
-            try {
-                Desktop.getDesktop().browse(new URI(payUrl()));
-            } catch (Exception ex) {
-                status.setText("브라우저를 열지 못했어요. 링크 복사를 눌러 주세요.");
-                status.setForeground(Ui.DANGER);
-            }
-        });
         copy.addActionListener(e -> {
-            if (!ready()) return;
+            if (check(amount[0]) != null || !ready()) return;     // 버튼이 꺼져 있어야 하지만 한 번 더 확인
             try {
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(payUrl()), null);
                 status.setText("링크를 복사했어요. 휴대폰으로 보내서 열어 주세요.");
@@ -200,8 +189,6 @@ final class Donate {
 
         JPanel buttons = row();
         buttons.setBorder(BorderFactory.createEmptyBorder(0, 24, 22, 24));
-        buttons.add(openLink);
-        buttons.add(Box.createHorizontalStrut(6));
         buttons.add(copy);
         buttons.add(Box.createHorizontalGlue());
         buttons.add(close);
