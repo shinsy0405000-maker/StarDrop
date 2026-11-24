@@ -5,7 +5,23 @@
 
 자바 프로젝트 수행평가 작품입니다.
 
-## 실행 방법
+## 다운로드
+
+[Releases](https://github.com/shinsy0405000-maker/StarDrop/releases/latest)에서 받을 수 있습니다.
+
+| 파일 | 설명 |
+|---|---|
+| `StarDrop-windows.zip` | **윈도우용, 자바 설치 필요 없음.** 압축을 풀고 `StarDrop/StarDrop.exe` 실행 |
+| `StarDrop.jar` | 자바 21 이상이 깔린 컴퓨터(윈도우, 맥, 리눅스)에서 더블클릭 또는 `java -jar StarDrop.jar` |
+
+릴리스 파일은 GitHub Actions(`.github/workflows/release.yml`)가 Release를 발행할 때마다 자동으로 만듭니다.
+
+## 버그 제보
+
+게임 안에서 **버그 제보** 버튼(처음 화면 오른쪽 위, 구역 목록) 또는 **F1**을 누르면 제보 창이 열립니다.
+무엇이 잘못됐는지 적고 "GitHub에 제보하기"를 누르면, 버전·구역·운영체제 정보가 채워진 [버그 제보 양식](https://github.com/shinsy0405000-maker/StarDrop/issues/new?template=bug_report.yml)이 브라우저에서 열립니다.
+
+## 직접 빌드해서 실행하기
 
 JDK 21 이상이 필요합니다.
 
@@ -28,6 +44,7 @@ IntelliJ IDEA에서는 이 폴더를 열고 `src/StarDrop.java`의 `main`을 실
 | R | 다시 조준 |
 | H | 정답 방향 보기 |
 | M | 소리 켜기/끄기 |
+| F1 | 버그 제보 창 |
 | F3 | FPS 표시 |
 | Esc | 처음 화면 |
 
@@ -94,11 +111,25 @@ src/
   Ui.java  Paints.java  Particle.java  Sound.java   글자·색·그리기 도우미, 불꽃, 소리
   ImageCache.java  CachedImage.java   미리 그려 두는 그림(캐시): 배경, 처음 화면, 빛 번짐, 행성
   AdditiveComposite.java   빛을 더하는 그리기 방식 (성운, 별)
+  BugReport.java       버그 제보 창 (GitHub 제보 양식을 미리 채워서 연다)
   fonts/               웹과 같은 글꼴 (Black Han Sans, IBM Plex Sans KR, IBM Plex Mono — SIL Open Font License, OFL-*.txt)
+.github/ISSUE_TEMPLATE/bug_report.yml   GitHub 버그 제보 양식
+.github/workflows/release.yml          배포: Release를 발행하면 jar와 윈도우 실행 파일을 자동으로 만듦
 web/index.html         처음에 만든 웹 버전 (브라우저로 열면 실행, 16개 구역)
 ```
 
 ## 개발 로그
+
+### 2026-11-24 — 1.0.0 배포, 버그 제보
+- **첫 정식 배포 (v1.0.0)**: GitHub Actions로 Release를 발행하면 자동으로 빌드
+  - `StarDrop.jar`: 글꼴까지 안에 넣은 실행 파일 (자바 21 이상)
+  - `StarDrop-windows.zip`: `jpackage`로 자바 실행 환경까지 함께 묶은 윈도우 프로그램 (자바 설치 없이 `StarDrop.exe` 실행)
+  - 배포 전에 같은 과정을 직접 돌려서, 묶은 프로그램이 켜지고 jar 안의 글꼴을 제대로 읽는 것까지 확인
+- **버그 제보 창** (`BugReport`): 처음 화면 오른쪽 위 / 구역 목록의 "버그 제보" 버튼, 또는 F1.
+  적은 내용에 버전·지금 화면(단계, 구역, 씨앗)·운영체제·자바 버전·창 크기를 붙여서 GitHub 제보 양식을 미리 채운 채로 브라우저에서 연다.
+  브라우저를 열 수 없으면 주소를 복사해 주고, "내용 복사" 버튼도 있음
+- GitHub 버그 제보 양식(`.github/ISSUE_TEMPLATE/bug_report.yml`) 추가: 무엇이 잘못됐나요 / 다시 생기는 방법 / 환경 / 스크린숏
+- 버전 번호 `Rules.VERSION = "1.0.0"`
 
 ### 2026-11-24 — 웹과 똑같이, 태양계 9단계
 - **구역 생성을 웹과 한 줄씩 똑같이**: `java.util.Random` 대신 웹의 난수 생성기(mulberry32)를 옮긴 `Mulberry32`를 쓰고,
