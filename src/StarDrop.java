@@ -10,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.locks.LockSupport;
 
 /*
@@ -25,26 +24,27 @@ import java.util.concurrent.locks.LockSupport;
 public class StarDrop extends ScreenPainter {
     private static final long serialVersionUID = 1L;
 
-    /** 구역별 안내 문구 (웹 버전과 같은 내용) */
-    private static final String[] TIPS = {
-        "마우스를 움직여 방향과 세기를 정하고, 클릭하면 발사합니다. 점선은 궤도의 앞부분만 보여 줍니다.",
-        "달은 발사하는 순간부터 공전합니다. 점선 예측에는 달의 움직임이 이미 반영되어 있습니다. 날아가는 동안 누르고 있거나 Space를 누르면 진행 방향으로 추진합니다(연료 1.2초).",
-        "블랙홀은 작지만 끌어당기는 힘이 큽니다. 주황색 원반 안쪽으로 들어가면 돌아오지 못합니다.",
-        "청록색 별은 소포를 밀어냅니다. 부딪히지는 않으니 방향을 꺾는 데 쓰세요.",
-        "보라색 웜홀에 들어가면 속도를 그대로 지닌 채 반대편 웜홀에서 나옵니다.",
-    };
+    /** 지구 단계 구역별 안내 문구 (웹 버전과 같은 내용, 구역 번호 → 문구) */
+    private static final String[] TIPS = new String[Campaign.STAGES];
+    static {
+        TIPS[0] = "마우스를 움직여 방향과 세기를 정하고, 클릭하면 발사합니다. 점선은 궤도의 앞부분만 보여 줍니다.";
+        TIPS[1] = "날아가는 동안 화면을 누르고 있거나 Space를 누르면 진행 방향으로 추진합니다. 연료는 1.2초 분량입니다.";
+        TIPS[2] = "달은 발사하는 순간부터 공전합니다. 점선 예측에는 달의 움직임이 이미 반영되어 있습니다.";
+        TIPS[5] = "블랙홀은 작지만 끌어당기는 힘이 큽니다. 주황색 원반 안쪽으로 들어가면 돌아오지 못합니다.";
+        TIPS[6] = "청록색 별은 소포를 밀어냅니다. 부딪히지는 않으니 방향을 꺾는 데 쓰세요.";
+        TIPS[7] = "보라색 웜홀에 들어가면 속도를 그대로 지닌 채 반대편 웜홀에서 나옵니다.";
+    }
+
+    /** 이 구역에서 보여 줄 안내 (없으면 null) */
+    private static String tipFor(int index) {
+        if (Campaign.chapterOf(index) == 0) return TIPS[index];
+        return Campaign.stageOf(index) == 0 ? Campaign.CHAPTER_TIPS[Campaign.chapterOf(index)] : null;
+    }
 
     public StarDrop() {
         setPreferredSize(new Dimension(1280, 720));
         setBackground(Ui.VOID);
         setFocusable(true);
-        Random r = new Random(11);
-        for (double[] t : twinkles) {       // 웹처럼 화면 밖까지 넉넉히 흩어 둔다
-            t[0] = -500 + r.nextDouble() * 2600;
-            t[1] = -500 + r.nextDouble() * 1900;
-            t[2] = r.nextDouble() * Math.PI * 2;
-            t[3] = 0.6 + r.nextDouble() * 2.2;
-        }
         loadProgress();
         installInput();
         showTitle();
@@ -102,7 +102,8 @@ public class StarDrop extends ScreenPainter {
     // ------------------------------------------------------------ 진행 기록 저장
     private void loadProgress() {
         try {
-            String[] parts = java.util.prefs.Preferences.userRoot().node("stardrop").get("progress", "").split(",");
+            // 웹과 같은 구역으로 바뀌면서 기록 이름을 progress2 로 새로 쓴다 (예전 5구역 기록과 섞이지 않게)
+            String[] parts = java.util.prefs.Preferences.userRoot().node("stardrop").get("progress2", "").split(",");
             for (int i = 0; i < parts.length && i < progress.length; i++) progress[i] = Integer.parseInt(parts[i].trim());
         } catch (Exception e) {
             // 기록이 없거나 읽을 수 없으면 처음부터
@@ -113,7 +114,7 @@ public class StarDrop extends ScreenPainter {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < progress.length; i++) sb.append(i == 0 ? "" : ",").append(progress[i]);
         try {
-            java.util.prefs.Preferences.userRoot().node("stardrop").put("progress", sb.toString());
+            java.util.prefs.Preferences.userRoot().node("stardrop").put("progress2", sb.toString());
         } catch (Exception e) {
             // 저장하지 못해도 게임은 계속된다
         }
@@ -124,27 +125,30 @@ public class StarDrop extends ScreenPainter {
         titleOpen = true;
         levelsOpen = false;
         endless = false;
-        loadLevel(LevelGenerator.CAMPAIGN_SEED[1], LevelGenerator.CAMPAIGN[1], LevelGenerator.CAMPAIGN_FIRST_TRY[1], true);
+        loadLevel(Campaign.seed(2), Campaign.config(2), Campaign.firstTry(2), true);     // 뒤에서 "달그림자"를 시범으로 날린다
     }
 
     protected void showLevels() {
         titleOpen = false;
         levelsOpen = true;
+        // 지금 하던 단계(처음이면 아직 못 끝낸 첫 단계)를 펼쳐 보여 준다
+        listChapter = level != null && !endless && !demo ? Campaign.chapterOf(levelIndex) : Campaign.chapterOf(firstUndone());
     }
+
 
     protected void startCampaign(int index) {
         titleOpen = false;
         levelsOpen = false;
         endless = false;
         levelIndex = index;
-        loadLevel(LevelGenerator.CAMPAIGN_SEED[index], LevelGenerator.CAMPAIGN[index], LevelGenerator.CAMPAIGN_FIRST_TRY[index], false);
+        loadLevel(Campaign.seed(index), Campaign.config(index), Campaign.firstTry(index), false);
     }
 
     protected void startEndless() {
         titleOpen = false;
         levelsOpen = false;
         endless = true;
-        endlessSeed = 1 + fx.nextInt(999_999);
+        endlessSeed = 1 + fx.nextInt(999_998);
         loadLevel(endlessSeed, LevelGenerator.endlessConfig(endlessSeed), 0, false);
     }
 
@@ -155,9 +159,11 @@ public class StarDrop extends ScreenPainter {
         Sound.thrust(false);
         final int ticket = ++loadTicket;      // 요청 번호. 늦게 끝난 옛 요청이 새 구역을 덮어쓰지 않게 한다
         Thread worker = new Thread(() -> {
-            Level made = LevelGenerator.create(seed, cfg, firstTry);
+            Level made = LevelGenerator.create(seed, cfg, firstTry, 600);   // 웹처럼 600번까지 시도
             SwingUtilities.invokeLater(() -> {
-                if (ticket == loadTicket) enterLevel(made, asDemo);
+                if (ticket != loadTicket) return;
+                if (made != null) enterLevel(made, asDemo);
+                else if (endless) startEndless();             // 이 씨앗으로는 못 만들면 다른 씨앗으로
             });
         });
         worker.setDaemon(true);
@@ -172,10 +178,10 @@ public class StarDrop extends ScreenPainter {
         ghost = new ArrayList<>();
         particles.clear();
         floaters.clear();
-        aimAngle = Math.atan2(level.getTargetY() - level.getStartY(), level.getTargetX() - level.getStartX());
+        aimAngle = JsMath.atan2(level.getTargetY() - level.getStartY(), level.getTargetX() - level.getStartX());
         aimPower = 0.5;
         resetShot();
-        tip = !demo && !endless ? TIPS[levelIndex] : null;
+        tip = !demo && !endless ? tipFor(levelIndex) : null;
         if (demo) {
             state = DEMO_WAIT;
             waitTimer = 0.6;
@@ -203,7 +209,7 @@ public class StarDrop extends ScreenPainter {
     }
 
     protected void nextLevel() {
-        if (!endless && levelIndex < LevelGenerator.CAMPAIGN.length - 1) startCampaign(levelIndex + 1);
+        if (!endless && levelIndex < Campaign.COUNT - 1) startCampaign(levelIndex + 1);
         else startEndless();
     }
 
@@ -509,9 +515,9 @@ public class StarDrop extends ScreenPainter {
     private void aimAt(MouseEvent e) {
         if (level == null) return;
         double wx = (e.getX() - viewX) / viewScale, wy = (e.getY() - viewY) / viewScale;
-        double dx = wx - level.getStartX(), dy = wy - level.getStartY(), dist = Math.hypot(dx, dy);
+        double dx = wx - level.getStartX(), dy = wy - level.getStartY(), dist = JsMath.hypot(dx, dy);
         if (dist < 10) return;
-        aimAngle = Math.atan2(dy, dx);
+        aimAngle = JsMath.atan2(dy, dx);
         aimPower = Math.max(0, Math.min(1, (dist - 50) / 330));
         previewDirty = true;
     }

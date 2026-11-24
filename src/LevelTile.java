@@ -28,10 +28,12 @@ class LevelTile extends Widget {
         g.setColor(solid ? Ui.AMBER : Ui.LINE);
         g.setStroke(solid ? new BasicStroke(1f) : Ui.DASHED);
         g.draw(new Rectangle2D.Double(rect.getX() + 0.5, rect.getY() + 0.5, rect.getWidth() - 1, rect.getHeight() - 1));
-        double x = rect.getX() + 14;
-        Ui.text(g, number, x, rect.getY() + 14 + 12, Ui.font(12, Font.PLAIN, true, 0), Ui.DIM);
-        Ui.text(g, name, x, rect.getY() + 14 + 12 + 6 + 17, Ui.font(17, Font.BOLD, false, 0), Ui.INK);
-        Ui.text(g, status, x, rect.getMaxY() - 14, Ui.font(14, Font.PLAIN, false, 0.08f), done ? Ui.AMBER : Ui.DIM);
+        // CSS: 안쪽 여백 14, 번호(12px) → 6px 간격 → 이름(17px 굵게), 상태(14px)는 아래에 붙인다
+        Font nf = Ui.font(12, Font.PLAIN, true, 0), tf = Ui.font(17, Font.BOLD, false, 0), sf = Ui.font(14, Font.PLAIN, false, 0.08f);
+        double x = rect.getX() + 15, top = rect.getY() + 15, nh = Ui.lineHeight(g, nf), th = Ui.lineHeight(g, tf), sh = Ui.lineHeight(g, sf);
+        Ui.text(g, number, x, Ui.baseline(g, nf, top, nh), nf, Ui.DIM);
+        Ui.text(g, name, x, Ui.baseline(g, tf, top + nh + 6, th), tf, Ui.INK);
+        Ui.text(g, status, x, Ui.baseline(g, sf, rect.getMaxY() - 15 - sh, sh), sf, done ? Ui.AMBER : Ui.DIM);
         g.setComposite(old);
     }
 }

@@ -12,7 +12,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /** 우주 화면(게임 세계)을 그리는 층: 배경, 천체, 배달지, 별, 조준선, 소포와 꼬리 */
 abstract class WorldPainter extends GameState {
@@ -36,19 +35,24 @@ abstract class WorldPainter extends GameState {
         g.scale(viewScale, viewScale);
         double vx0 = -viewX / viewScale, vy0 = -viewY / viewScale, vw = w / viewScale, vh = h / viewScale;
 
-        Random r = new Random(level.getSeed() * 17 + 3);
-        double baseHue = r.nextDouble() * 360;
+        // 성운과 별: 웹과 같은 난수 순서로 그리고, 빛을 더하는 방식(lighter)으로 겹친다
+        Mulberry32 r = new Mulberry32((int) (level.getSeed() * 17 + 3));
+        double baseHue = level.getLookHue();
+        java.awt.Composite normal = g.getComposite();
+        g.setComposite(AdditiveComposite.INSTANCE);
         for (int i = 0; i < 9; i++) {           // 성운
-            double x = vx0 + r.nextDouble() * vw, y = vy0 + r.nextDouble() * vh, rad = 180 + r.nextDouble() * 420, hue = baseHue + (r.nextDouble() - 0.5) * 90;
+            double x = vx0 + r.next() * vw, y = vy0 + r.next() * vh, rad = 180 + r.next() * 420, hue = baseHue + (r.next() - 0.5) * 90;
             g.setPaint(new RadialGradientPaint((float) x, (float) y, (float) rad, new float[]{0f, 0.5f, 1f},
-                    new Color[]{Paints.hsl(hue, 0.75, 0.45, 18 + r.nextInt(23)), Paints.hsl(hue + 25, 0.7, 0.35, 10), Paints.hsl(hue, 0.7, 0.35, 0)}));
+                    new Color[]{hsla(hue, 75, 45, 0.07 + r.next() * 0.09), hsla(hue + 25, 70, 35, 0.04), new Color(0, 0, 0, 0)}));
             g.fill(new Rectangle2D.Double(x - rad, y - rad, rad * 2, rad * 2));
         }
         for (int i = 0; i < 520; i++) {         // 별
-            double x = vx0 + r.nextDouble() * vw, y = vy0 + r.nextDouble() * vh, size = 0.3 + r.nextDouble() * r.nextDouble() * 1.5;
-            g.setColor(Paints.hsl(r.nextDouble() < 0.2 ? 30 + r.nextDouble() * 30 : 210 + r.nextDouble() * 40, r.nextDouble() * 0.6, 0.75 + r.nextDouble() * 0.25, 38 + r.nextInt(190)));
+            double x = vx0 + r.next() * vw, y = vy0 + r.next() * vh, size = 0.3 + r.next() * r.next() * 1.5;
+            double hue = r.next() < 0.2 ? 30 + r.next() * 30 : 210 + r.next() * 40;
+            g.setColor(hsla(hue, r.next() * 60, 75 + r.next() * 25, 0.15 + r.next() * 0.75));
             Paints.circle(g, x, y, size);
         }
+        g.setComposite(normal);
         // 휘어진 시공간 격자: 격자점을 천체 쪽으로(밀어내는 별은 바깥으로) 옮겨서 그린다
         g.setColor(new Color(140, 165, 255, 22));
         g.setStroke(new BasicStroke((float) (1 / viewScale)));
@@ -73,6 +77,11 @@ abstract class WorldPainter extends GameState {
         }
     }
 
+    /** CSS 의 hsla(색상, 채도%, 밝기%, 투명도 0~1) */
+    protected static Color hsla(double h, double s, double l, double a) {
+        return Paints.hsl(h, s / 100, l / 100, (int) Math.round(a * 255));
+    }
+
     protected static void warp(Level lv, double x, double y, double[] out) {
         double dx = 0, dy = 0;
         for (int i = 0; i < lv.getBodyCount(); i++) {
@@ -88,9 +97,9 @@ abstract class WorldPainter extends GameState {
     }
 
     protected void drawWorld(Graphics2D g) {
-        for (double[] t : twinkles) {           // 반짝이는 별
-            g.setColor(new Color(223, 230, 255, (int) (60 + 190 * (0.5 + 0.5 * Math.sin(anim * t[3] + t[2])))));
-            g.fill(new Rectangle2D.Double(t[0], t[1], t[2] % 1.3 + 0.6, t[2] % 1.3 + 0.6));
+        for (double[] t : level.getTwinkles()) {       // 반짝이는 별 {x, y, 크기, 위상, 속도}
+            g.setColor(new Color(223, 230, 255, (int) Math.round(255 * (0.25 + 0.75 * (0.5 + 0.5 * Math.sin(anim * t[4] + t[3]))))));
+            g.fill(new Rectangle2D.Double(t[0], t[1], t[2], t[2]));
         }
         double flightTime = ship != null && state != AIM ? ship.getTime() : 0;
 

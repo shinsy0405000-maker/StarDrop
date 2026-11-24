@@ -24,11 +24,12 @@ abstract class GameState extends JPanel {
     protected boolean demo;                 // 처음 화면 뒤에서 정답을 자동으로 쏘는 시범
     protected boolean titleOpen, levelsOpen;
     protected boolean endless;              // 무한 배달 모드인가
-    protected int levelIndex;               // 5개 구역 중 몇 번째인가
+    protected int levelIndex;               // 캠페인 144구역 중 몇 번째인가 (단계 = levelIndex / 16)
+    protected int listChapter;              // 구역 목록에서 보고 있는 단계
     protected long endlessSeed;
     protected transient Level level;
     protected int loadTicket;               // 마지막으로 요청한 구역 번호
-    protected final int[] progress = new int[LevelGenerator.CAMPAIGN.length];   // 0 = 아직, 1~4 = 별 0~3개로 배달함
+    protected final int[] progress = new int[Campaign.COUNT];   // 0 = 아직, 1~4 = 별 0~3개로 배달함
 
     // 조준과 비행
     protected double aimAngle, aimPower = 0.5;
@@ -58,7 +59,6 @@ abstract class GameState extends JPanel {
     protected final transient CachedImage background = new CachedImage();   // 배경: 성운, 별, 휘어진 격자
     protected final transient CachedImage titleLayer = new CachedImage();   // 처음 화면: 그라데이션, 제목, 설명, 조작 안내
     protected transient List<Widget> titleButtons = new ArrayList<>();      // 처음 화면 그림을 만들 때 같이 만든 버튼들
-    protected final double[][] twinkles = new double[110][4];
     protected double anim, shake;
     protected long lastNanos = System.nanoTime();
     protected final Random fx = new Random();
@@ -78,6 +78,12 @@ abstract class GameState extends JPanel {
     protected abstract void startCampaign(int index);
     protected abstract void startEndless();
     protected abstract void nextLevel();
+
+    /** 아직 배달하지 않은 첫 구역 (전부 했으면 0) */
+    protected int firstUndone() {
+        for (int i = 0; i < progress.length; i++) if (progress[i] == 0) return i;
+        return 0;
+    }
 
     protected int starCount() {
         int n = 0;

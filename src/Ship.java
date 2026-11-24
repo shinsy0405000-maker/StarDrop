@@ -12,8 +12,8 @@ class Ship {
         double speed = Rules.MIN_SPEED + (Rules.MAX_SPEED - Rules.MIN_SPEED) * power;
         x = level.getStartX();
         y = level.getStartY();
-        vx = Math.cos(angle) * speed;
-        vy = Math.sin(angle) * speed;
+        vx = JsMath.cos(angle) * speed;
+        vy = JsMath.sin(angle) * speed;
     }
 
     public double getX() { return x; }

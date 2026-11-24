@@ -22,8 +22,8 @@ class Moon implements CelestialBody {
         this.mass = 3000 * radius * radius;
     }
 
-    private double xAt(double t) { return centerX + Math.cos(phase + speed * t) * orbit; }
-    private double yAt(double t) { return centerY + Math.sin(phase + speed * t) * orbit; }
+    private double xAt(double t) { return centerX + JsMath.cos(phase + speed * t) * orbit; }
+    private double yAt(double t) { return centerY + JsMath.sin(phase + speed * t) * orbit; }
 
     @Override
     public boolean pull(double px, double py, double flightTime, double[] acc) {
