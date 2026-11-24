@@ -233,6 +233,17 @@ public class StarDrop extends ScreenPainter {
         });
     }
 
+    /** 후원 창 */
+    protected void openDonate() {
+        thrusting = false;
+        mouseDown = false;
+        armed = false;
+        SwingUtilities.invokeLater(() -> {
+            Donate.open(this);
+            requestFocusInWindow();
+        });
+    }
+
     protected void nextLevel() {
         if (!endless && levelIndex < Campaign.COUNT - 1) startCampaign(levelIndex + 1);
         else startEndless();
