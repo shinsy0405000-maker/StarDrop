@@ -2,12 +2,14 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -19,33 +21,40 @@ import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.StringSelection;
 import java.net.URI;
 
 /**
- * 후원 창.
+ * 후원 창 (카카오페이 송금코드).
  *
- * 금액(5,000원 / 10,000원 / 30,000원 / 직접 입력)을 고르면
- * 토스 송금 링크(toss.me/아이디/금액)를 브라우저로 열어 준다. 5,000원보다 적은 금액은 고를 수 없다.
- * 토스 아이디가 아직 없으면 TOSS_ID 를 비워 두고, 생기면 이 한 줄만 바꾸면 된다.
+ * 금액(5,000원 / 10,000원 / 30,000원 / 직접 입력)을 고르면 카카오페이 송금 QR이 나온다.
+ * 휴대폰 카메라나 카카오톡으로 QR을 찍으면 카카오페이 송금 화면이 열리고, 거기서 고른 금액을 보내면 된다.
+ * 5,000원보다 적은 금액을 고르면 QR이 나오지 않는다.
+ *
+ * 카카오페이 송금은 휴대폰 카카오톡 안에서만 되기 때문에, PC 게임에서는 QR을 보여 주는 게 가장 편하다.
+ * (링크 열기 / 링크 복사 버튼도 같이 둔다)
+ * 송금코드 링크가 아직 없으면 KAKAOPAY_LINK 를 비워 두고, 생기면 이 한 줄만 바꾸면 된다.
  */
 final class Donate {
     private Donate() { }
 
-    /** 토스 아이디 (toss.me/ 뒤에 붙는 부분). 비어 있으면 "준비 중"으로 보인다 */
-    static final String TOSS_ID = "";
+    /** 카카오페이 송금코드 링크 (https://qr.kakaopay.com/... 전체, 또는 / 뒤의 코드만). 비어 있으면 "준비 중" */
+    static final String KAKAOPAY_LINK = "";
 
     static final int MIN_AMOUNT = 5_000;           // 최소 후원 금액(원)
     static final int MAX_AMOUNT = 10_000_000;      // 잘못 입력한 큰 숫자를 막기 위한 한도
     static final int[] PRESETS = {5_000, 10_000, 30_000};
 
     static boolean ready() {
-        return !TOSS_ID.isBlank();
+        return !KAKAOPAY_LINK.isBlank();
     }
 
-    /** 토스 송금 주소. 금액이 미리 채워진 채로 열린다 */
-    static String tossUrl(int amount) {
-        return "https://toss.me/" + TOSS_ID.strip() + "/" + amount;
+    /** 송금코드 주소. 코드만 적었으면 앞에 주소를 붙여 준다 */
+    static String payUrl() {
+        String s = KAKAOPAY_LINK.strip();
+        return s.startsWith("http") ? s : "https://qr.kakaopay.com/" + s;
     }
 
     /** "12,000" 이나 "12000원" 같은 글에서 금액을 읽는다. 숫자가 없으면 -1 */
@@ -106,12 +115,27 @@ final class Donate {
 
         JLabel status = label(" ", Ui.font(14, Font.BOLD, false, 0), Ui.AMBER);
         body.add(status);
+        body.add(Box.createVerticalStrut(14));
 
-        JButton send = button("토스로 후원하기", true), close = button("닫기", false);
-        if (!ready()) {
-            send.setText("후원 링크 준비 중");
-            send.setEnabled(false);
-        }
+        // QR 자리: 링크가 있고 금액이 맞을 때만 QR을 보여 준다
+        JLabel qr = new JLabel("", SwingConstants.CENTER);
+        qr.setFont(Ui.font(14, Ui.MEDIUM, false, 0));
+        qr.setForeground(Ui.SOFT_INK);
+        qr.setOpaque(true);
+        qr.setBackground(Ui.VOID);
+        qr.setBorder(BorderFactory.createLineBorder(Ui.LINE));
+        qr.setAlignmentX(Component.LEFT_ALIGNMENT);
+        Dimension qrBox = new Dimension(Integer.MAX_VALUE, 236);
+        qr.setPreferredSize(new Dimension(10, 236));
+        qr.setMaximumSize(qrBox);
+        ImageIcon qrIcon = ready() ? new ImageIcon(QrCode.encode(payUrl()).toImage(6, Color.BLACK, Color.WHITE)) : null;
+        body.add(qr);
+        body.add(Box.createVerticalStrut(8));
+        JLabel hint = label("<html>휴대폰 카메라나 카카오톡으로 QR을 찍으면 카카오페이 송금 화면이 열려요.</html>",
+                Ui.font(13, Font.PLAIN, false, 0), Ui.SOFT_INK);
+        body.add(hint);
+
+        JButton openLink = button("링크 열기", true), copy = button("링크 복사", false), close = button("닫기", false);
 
         // 지금 고른 금액 (-1 = 아직 고르지 않음)
         int[] amount = {PRESETS[0]};
@@ -121,10 +145,14 @@ final class Donate {
                 status.setText(amount[0] == -1 && custom.getText().isBlank() ? "금액을 적어 주세요." : problem);
                 status.setForeground(Ui.DANGER);
             } else {
-                status.setText(String.format("%,d원을 후원합니다.", amount[0]));
+                status.setText(String.format("송금 화면에서 %,d원을 입력해 주세요.", amount[0]));
                 status.setForeground(Ui.AMBER);
             }
-            send.setEnabled(ready() && problem == null);
+            boolean show = ready() && problem == null;
+            qr.setIcon(show ? qrIcon : null);
+            qr.setText(show ? "" : ready() ? "금액을 먼저 골라 주세요" : "후원 링크 준비 중");
+            openLink.setEnabled(show);
+            copy.setEnabled(show);
         };
         for (int i = 0; i <= PRESETS.length; i++) {
             final int index = i;
@@ -148,13 +176,23 @@ final class Donate {
         choices[0].setSelected(true);
         refresh.run();
 
-        send.addActionListener(e -> {
+        openLink.addActionListener(e -> {
             if (check(amount[0]) != null || !ready()) return;     // 버튼이 꺼져 있어야 하지만 한 번 더 확인
             try {
-                Desktop.getDesktop().browse(new URI(tossUrl(amount[0])));
-                dialog.dispose();
+                Desktop.getDesktop().browse(new URI(payUrl()));
             } catch (Exception ex) {
-                status.setText("브라우저를 열지 못했어요. " + tossUrl(amount[0]));
+                status.setText("브라우저를 열지 못했어요. 링크 복사를 눌러 주세요.");
+                status.setForeground(Ui.DANGER);
+            }
+        });
+        copy.addActionListener(e -> {
+            if (!ready()) return;
+            try {
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(payUrl()), null);
+                status.setText("링크를 복사했어요. 휴대폰으로 보내서 열어 주세요.");
+                status.setForeground(Ui.AMBER);
+            } catch (Exception ex) {
+                status.setText("복사하지 못했어요: " + payUrl());
                 status.setForeground(Ui.DANGER);
             }
         });
@@ -162,7 +200,9 @@ final class Donate {
 
         JPanel buttons = row();
         buttons.setBorder(BorderFactory.createEmptyBorder(0, 24, 22, 24));
-        buttons.add(send);
+        buttons.add(openLink);
+        buttons.add(Box.createHorizontalStrut(6));
+        buttons.add(copy);
         buttons.add(Box.createHorizontalGlue());
         buttons.add(close);
 
