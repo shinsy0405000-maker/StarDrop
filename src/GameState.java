@@ -78,6 +78,7 @@ abstract class GameState extends JPanel {
     protected abstract void startCampaign(int index);
     protected abstract void startEndless();
     protected abstract void nextLevel();
+    protected abstract void openBugReport();
 
     /** 아직 배달하지 않은 첫 구역 (전부 했으면 0) */
     protected int firstUndone() {

@@ -235,6 +235,11 @@ abstract class ScreenPainter extends WorldPainter {
             bx += bw + 10;
         }
 
+        // 오른쪽 위: 버그 제보 (웹에는 없는 버튼. 도구 버튼과 같은 모양)
+        double rw = Button.widthFor(g, "버그 제보", "F1", 13, Font.PLAIN, 12);
+        out.add(new Button(new Rectangle2D.Double(w - 16 - rw, 14, rw, 7 + Ui.lineHeight(g, Ui.font(13, Font.PLAIN, false, 0)) + 7 + 2),
+                "버그 제보", "F1", 13, false, false, this::openBugReport));
+
         // 조작 안내 (키 모양 상자)
         String[][] keys = {{"마우스", "조준"}, {"클릭", "발사"}, {"Space", "추진"}, {"←→↑↓", "미세 조정 (Shift로 더 세밀하게)"}};
         double kx = padX, base = Ui.baseline(g, keyFont, keysTop, keysH), space = Ui.width(g, " ", keyFont);
@@ -335,9 +340,9 @@ abstract class ScreenPainter extends WorldPainter {
         }
         int rows = (Campaign.STAGES + cols - 1) / cols;
         double by = gridY + rows * 118 - 10 + 22, bx = padX, bh = 10 + Ui.lineHeight(g, Ui.font(15, Ui.MEDIUM, false, 0)) + 10 + 2;
-        String[] labels = {"처음 화면", "무한 배달"};
-        Runnable[] actions = {this::showTitle, this::startEndless};
-        for (int i = 0; i < 2; i++) {
+        String[] labels = {"처음 화면", "무한 배달", "버그 제보"};
+        Runnable[] actions = {this::showTitle, this::startEndless, this::openBugReport};
+        for (int i = 0; i < 3; i++) {
             double bw = Button.widthFor(g, labels[i], null, 15, Ui.MEDIUM, 16);
             out.add(new Button(new Rectangle2D.Double(bx, by, bw, bh), labels[i], null, 15, Ui.MEDIUM, false, false, new Color(14, 15, 38, 217), actions[i]));
             bx += bw + 8;

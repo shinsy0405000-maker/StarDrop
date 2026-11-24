@@ -208,6 +208,31 @@ public class StarDrop extends ScreenPainter {
         resetShot();
     }
 
+    /** 버그 제보 창: 지금 상황(버전, 구역, 운영체제 등)을 자동으로 적어서 띄운다 */
+    protected void openBugReport() {
+        thrusting = false;
+        mouseDown = false;
+        armed = false;
+        String where;
+        if (titleOpen) where = "처음 화면";
+        else if (levelsOpen) where = "구역 목록 (" + Campaign.CHAPTERS[listChapter] + " 단계)";
+        else if (level == null) where = "구역 불러오는 중";
+        else if (endless) where = "무한 배달 No. " + endlessSeed;
+        else where = String.format("%s 단계 %02d · %s (씨앗 %d)", Campaign.chapterName(levelIndex), Campaign.stageOf(levelIndex) + 1,
+                level.getName(), Campaign.seed(levelIndex));
+        String info = "버전: 별똥 택배 " + Rules.VERSION
+                + "\n화면: " + where
+                + (level != null && !titleOpen && !levelsOpen ? "\n발사 횟수: " + tries : "")
+                + "\n운영체제: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+                + "\n자바: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")"
+                + "\n창 크기: " + getWidth() + "×" + getHeight()
+                + String.format(", 화면 배율 %.0f%%", getGraphicsConfiguration() == null ? 100 : getGraphicsConfiguration().getDefaultTransform().getScaleX() * 100);
+        SwingUtilities.invokeLater(() -> {      // 버튼을 누른 처리가 끝난 뒤에 창을 연다
+            BugReport.open(this, info);
+            requestFocusInWindow();
+        });
+    }
+
     protected void nextLevel() {
         if (!endless && levelIndex < Campaign.COUNT - 1) startCampaign(levelIndex + 1);
         else startEndless();
@@ -479,6 +504,7 @@ public class StarDrop extends ScreenPainter {
                 if (key == KeyEvent.VK_SHIFT) shiftHeld = true;
                 boolean firstArrow = setArrow(key, true);     // 키 반복으로 다시 들어온 것은 false
                 if (key == KeyEvent.VK_F3) showFps = !showFps;
+                if (key == KeyEvent.VK_F1) openBugReport();
                 if (key == KeyEvent.VK_M) Sound.setMuted(!Sound.isMuted());
                 if (key == KeyEvent.VK_ESCAPE && !titleOpen) showTitle();
                 if (titleOpen || levelsOpen || demo || level == null) return;
