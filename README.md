@@ -21,6 +21,12 @@
 게임 안에서 **버그 제보** 버튼(처음 화면 오른쪽 위, 구역 목록) 또는 **F1**을 누르면 제보 창이 열립니다.
 무엇이 잘못됐는지 적고 "GitHub에 제보하기"를 누르면, 버전·구역·운영체제 정보가 채워진 [버그 제보 양식](https://github.com/shinsy0405000-maker/StarDrop/issues/new?template=bug_report.yml)이 브라우저에서 열립니다.
 
+## 후원
+
+게임 처음 화면 오른쪽 위나 구역 목록의 **후원하기** 버튼을 누르면 후원 창이 열립니다.
+10,000원 / 30,000원 / 50,000원 중에서 고르거나 직접 적을 수 있고, **최소 금액은 10,000원**입니다.
+금액을 고르면 토스 송금 링크(`toss.me/아이디/금액`)가 금액이 채워진 채로 열립니다. (후원 링크는 준비 중입니다)
+
 ## 직접 빌드해서 실행하기
 
 JDK 21 이상이 필요합니다.
@@ -112,6 +118,7 @@ src/
   ImageCache.java  CachedImage.java   미리 그려 두는 그림(캐시): 배경, 처음 화면, 빛 번짐, 행성
   AdditiveComposite.java   빛을 더하는 그리기 방식 (성운, 별)
   BugReport.java       버그 제보 창 (GitHub 제보 양식을 미리 채워서 연다)
+  Donate.java          후원 창 (최소 10,000원, 토스 송금 링크를 연다)
   fonts/               웹과 같은 글꼴 (Black Han Sans, IBM Plex Sans KR, IBM Plex Mono — SIL Open Font License, OFL-*.txt)
 .github/ISSUE_TEMPLATE/bug_report.yml   GitHub 버그 제보 양식
 .github/workflows/release.yml          배포: Release를 발행하면 jar와 윈도우 실행 파일을 자동으로 만듦
@@ -119,6 +126,13 @@ web/index.html         처음에 만든 웹 버전 (브라우저로 열면 실�
 ```
 
 ## 개발 로그
+
+### 2026-11-24 — 후원 창
+- **후원 창** (`Donate`): 처음 화면 오른쪽 위 / 구역 목록의 "후원하기" 버튼
+  - 10,000원 / 30,000원 / 50,000원 / 직접 입력. 10,000원보다 적거나 숫자가 아니면 안내가 뜨고 후원 버튼이 꺼짐
+  - "12,000원", "25,000"처럼 쉼표나 '원'을 붙여 적어도 금액을 읽음
+  - 토스 송금 링크(`toss.me/아이디/금액`)를 금액이 채워진 채로 브라우저에서 염
+  - 토스 아이디는 `Donate.TOSS_ID` 한 줄에만 적으면 됨. 비어 있는 동안은 "후원 링크 준비 중"으로 보임
 
 ### 2026-11-24 — 1.0.0 배포, 버그 제보
 - **첫 정식 배포 (v1.0.0)**: GitHub Actions로 Release를 발행하면 자동으로 빌드
