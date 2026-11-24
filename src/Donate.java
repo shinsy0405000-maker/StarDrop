@@ -25,8 +25,8 @@ import java.net.URI;
 /**
  * 후원 창.
  *
- * 금액(10,000원 / 30,000원 / 50,000원 / 직접 입력)을 고르면
- * 토스 송금 링크(toss.me/아이디/금액)를 브라우저로 열어 준다. 10,000원보다 적은 금액은 고를 수 없다.
+ * 금액(5,000원 / 10,000원 / 30,000원 / 직접 입력)을 고르면
+ * 토스 송금 링크(toss.me/아이디/금액)를 브라우저로 열어 준다. 5,000원보다 적은 금액은 고를 수 없다.
  * 토스 아이디가 아직 없으면 TOSS_ID 를 비워 두고, 생기면 이 한 줄만 바꾸면 된다.
  */
 final class Donate {
@@ -35,9 +35,9 @@ final class Donate {
     /** 토스 아이디 (toss.me/ 뒤에 붙는 부분). 비어 있으면 "준비 중"으로 보인다 */
     static final String TOSS_ID = "";
 
-    static final int MIN_AMOUNT = 10_000;          // 최소 후원 금액(원)
+    static final int MIN_AMOUNT = 5_000;           // 최소 후원 금액(원)
     static final int MAX_AMOUNT = 10_000_000;      // 잘못 입력한 큰 숫자를 막기 위한 한도
-    static final int[] PRESETS = {10_000, 30_000, 50_000};
+    static final int[] PRESETS = {5_000, 10_000, 30_000};
 
     static boolean ready() {
         return !TOSS_ID.isBlank();
@@ -76,7 +76,7 @@ final class Donate {
         body.add(label("<html>별똥 택배가 재미있었다면 후원으로 응원해 주세요.<br>후원금은 새 구역과 기능을 만드는 데 쓰입니다.</html>",
                 Ui.font(14, Font.PLAIN, false, 0), Ui.SOFT_INK));
         body.add(Box.createVerticalStrut(18));
-        body.add(label("금액 (최소 10,000원)", Ui.font(13, Font.BOLD, false, 0), Ui.SOFT_INK));
+        body.add(label(String.format("금액 (최소 %,d원)", MIN_AMOUNT), Ui.font(13, Font.BOLD, false, 0), Ui.SOFT_INK));
         body.add(Box.createVerticalStrut(8));
 
         // 금액 고르기: 정해진 금액 3개 + 직접 입력
