@@ -1,0 +1,35 @@
+name: 버그 제보
+description: 게임에서 이상한 점을 알려 주세요
+title: "[버그] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        제보해 주셔서 고맙습니다! 게임 안의 **버그 제보** 버튼(또는 F1)으로 열면 아래 칸이 자동으로 채워집니다.
+  - type: textarea
+    id: what
+    attributes:
+      label: 무엇이 잘못됐나요?
+      placeholder: 예) 화성 단계 3번 구역에서 달에 부딪혔는데 '파손'이 뜨지 않고 그냥 지나갑니다.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 어떻게 하면 다시 생기나요?
+      placeholder: |
+        1. 구역 목록에서 화성 → 03 선택
+        2. 정답 방향(H)으로 발사
+        3. ...
+  - type: textarea
+    id: env
+    attributes:
+      label: 환경
+      description: 버전, 구역, 운영체제, 자바 버전 (게임에서 열면 자동으로 채워집니다)
+      render: text
+  - type: textarea
+    id: shots
+    attributes:
+      label: 스크린숏 (선택)
+      description: 화면을 캡처해서 여기에 끌어다 놓으세요.
