@@ -21,6 +21,12 @@
 게임 안에서 **버그 제보** 버튼(처음 화면 오른쪽 위, 구역 목록) 또는 **F1**을 누르면 제보 창이 열립니다.
 무엇이 잘못됐는지 적고 "GitHub에 제보하기"를 누르면, 버전·구역·운영체제 정보가 채워진 [버그 제보 양식](https://github.com/shinsy0405000-maker/StarDrop/issues/new?template=bug_report.yml)이 브라우저에서 열립니다.
 
+## 언어
+
+**한국어 · English · 日本語 · 中文** 네 가지를 지원합니다.
+처음 화면 오른쪽 위의 **언어 · Language** 버튼을 누르고 고르면 바로 바뀌고, 다음에 켤 때도 그 언어로 열립니다.
+처음 켤 때는 컴퓨터 언어를 따릅니다 (네 언어가 아니면 영어).
+
 ## 후원
 
 게임 처음 화면 오른쪽 위나 구역 목록의 **후원하기** 버튼을 누르면 후원 창이 열립니다.
@@ -121,6 +127,8 @@ src/
   BugReport.java       버그 제보 창 (GitHub 제보 양식을 미리 채워서 연다)
   Donate.java          후원 창 (최소 5,000원, 카카오페이 송금 QR을 보여 준다)
   QrCode.java          QR 코드 만들기 (라이브러리 없이 직접 구현)
+  Lang.java            언어 설정과 번역 표 (한국어 → English, 日本語, 中文)
+  LanguagePicker.java  언어 고르는 창
   fonts/               웹과 같은 글꼴 (Black Han Sans, IBM Plex Sans KR, IBM Plex Mono — SIL Open Font License, OFL-*.txt)
 .github/ISSUE_TEMPLATE/bug_report.yml   GitHub 버그 제보 양식
 .github/FUNDING.yml                    저장소 Sponsor 버튼 → 후원 페이지
@@ -130,6 +138,19 @@ web/index.html         처음에 만든 웹 버전 (브라우저로 열면 실�
 ```
 
 ## 개발 로그
+
+### 2026-11-25 — 언어 설정 (한국어, English, 日本語, 中文)
+- **언어 고르는 창** (`LanguagePicker`): 처음 화면 오른쪽 위 "언어 · Language" 버튼
+  - 지금 언어를 못 읽는 사람도 찾을 수 있게 버튼에 늘 "Language" 를 붙임
+  - 고르면 게임을 다시 켜지 않아도 바로 바뀌고, 진행 기록과 같은 곳에 저장됨
+- **번역 표** (`Lang`): 게임 안의 글은 한국어로 적고 `Lang.t("배달 시작")` 처럼 감싸면 고른 언어로 바뀜
+  - 메뉴, HUD, 구역 이름 16개, 태양계 9단계, 안내 문구, 영수증, 버그 제보 창, 후원 창까지 전부
+  - 숫자가 들어간 글(`%d회` 등)은 번역마다 빈칸 개수가 같은지 확인함
+- **글꼴**: 들고 다니는 글꼴(IBM Plex Sans KR, Black Han Sans)에는 가나·한자가 없어서,
+  일본어는 Yu Gothic / Meiryo, 중국어는 Microsoft YaHei 처럼 컴퓨터에 깔린 글꼴을 골라 씀
+- **줄 바꿈**: 일본어·중국어는 글자 사이에서 줄을 바꾸고, 마침표(。、)나 작은 가나가 줄 맨 앞에 오지 않게 함
+- 영어 설명이 길어 처음 화면 위쪽이 잘리면 제목 글자를 줄이고, 영수증 제목이 도장과 겹치면 줄이게 함
+- 한국어 화면은 전과 픽셀 단위로 같은지 비교해서 확인함 (처음 화면의 언어 버튼만 새로 생김)
 
 ### 2026-11-24 — GitHub 후원 페이지
 - **후원 페이지** [`DONATE.md`](DONATE.md): 게임을 안 받아도 GitHub에서 바로 후원할 수 있게 QR과 방법을 정리
