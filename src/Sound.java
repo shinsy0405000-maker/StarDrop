@@ -7,7 +7,8 @@ import java.util.Random;
 
 /**
  * 소리: 음원 파일 없이 전부 계산해서 만든다 (웹 버전의 Web Audio 구성을 그대로 옮김).
- * 오디오 스레드 하나가 배경음, 추진음, 효과음을 섞고 메아리(딜레이)를 입혀 스피커로 보낸다.
+ * 오디오 스레드 하나가 추진음과 효과음을 섞고 메아리(딜레이)를 입혀 스피커로 보낸다.
+ * (예전에는 "웅" 하는 배경음도 깔았지만, 거슬린다는 의견이 있어 뺐다)
  */
 final class Sound {
     private Sound() { }
@@ -131,34 +132,18 @@ final class Sound {
             List<int[]> positions = new ArrayList<>();
             Random rnd = new Random();
 
-            // 배경음: 웹과 같은 7개 음, 짝수는 톱니파 홀수는 삼각파, 저역 필터를 천천히 흔든다
-            double[] padFreq = {55, 110, 164.81, 220, 261.63, 329.63, 493.88};
-            double[] padPhase = new double[7];
-            Biquad padFilter = new Biquad(), thrustFilter = new Biquad();
+            Biquad thrustFilter = new Biquad();
             thrustFilter.bandpass(700, 0.6);
             float[] delay = new float[(int) (0.27 * RATE)];      // 메아리: 0.27초 뒤에 34%씩 되돌아온다
             int delayPos = 0;
-            double time = 0, master = 0, thrustGain = 0;
+            double master = 0, thrustGain = 0;
 
             while (true) {
                 synchronized (QUEUE) {
                     for (float[] q : QUEUE) { voices.add(q); positions.add(new int[1]); }
                     QUEUE.clear();
                 }
-                padFilter.lowpass(480 + 190 * Math.sin(2 * Math.PI * 0.06 * time), 0.8);
                 for (int i = 0; i < CHUNK; i++) {
-                    double t = time + i / RATE;
-                    // 배경음
-                    double pad = 0;
-                    for (int k = 0; k < 7; k++) {
-                        double f = padFreq[k] * Math.pow(2, ((k * 37 % 17) - 8) / 1200.0);
-                        padPhase[k] += f / RATE;
-                        double p = padPhase[k] - Math.floor(padPhase[k]);
-                        double wave = k % 2 == 1 ? 4 * Math.abs(p - 0.5) - 1 : 2 * p - 1;
-                        double g = k > 4 ? 0.06 : 0.16;
-                        pad += wave * (g + g * 0.6 * Math.sin(2 * Math.PI * (0.05 + k * 0.013) * t));
-                    }
-                    pad = padFilter.process(pad) * 0.13 * Math.min(1, t / 5);
                     // 효과음
                     double fx = 0;
                     for (int v = 0; v < voices.size(); v++) {
@@ -170,15 +155,14 @@ final class Sound {
                     double th = thrustFilter.process(rnd.nextDouble() * 2 - 1) * thrustGain;
                     // 메아리
                     double echoed = delay[delayPos];
-                    delay[delayPos] = (float) (fx + pad + echoed * 0.34);
+                    delay[delayPos] = (float) (fx + echoed * 0.34);
                     delayPos = (delayPos + 1) % delay.length;
                     master += ((muted ? 0 : 0.7) - master) * (1 / (0.05 * RATE));
-                    double s = Math.tanh((fx + pad + th + echoed * 0.3) * master * 1.6);
+                    double s = Math.tanh((fx + th + echoed * 0.3) * master * 1.6);
                     short v = (short) (s * 30000);
                     out[i * 2] = (byte) v;
                     out[i * 2 + 1] = (byte) (v >> 8);
                 }
-                time += CHUNK / RATE;
                 for (int v = voices.size() - 1; v >= 0; v--) {
                     if (positions.get(v)[0] >= voices.get(v).length) { voices.remove(v); positions.remove(v); }
                 }
