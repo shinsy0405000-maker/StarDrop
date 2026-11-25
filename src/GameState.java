@@ -80,6 +80,7 @@ abstract class GameState extends JPanel {
     protected abstract void nextLevel();
     protected abstract void openBugReport();
     protected abstract void openDonate();
+    protected abstract void openLanguage();
 
     /** 아직 배달하지 않은 첫 구역 (전부 했으면 0) */
     protected int firstUndone() {

@@ -213,24 +213,47 @@ public class StarDrop extends ScreenPainter {
         thrusting = false;
         mouseDown = false;
         armed = false;
+        // 화면에 보이는 그대로 지금 언어로 적는다 ("언어" 줄이 있어서 개발자도 어떤 언어 화면인지 안다)
         String where;
-        if (titleOpen) where = "처음 화면";
-        else if (levelsOpen) where = "구역 목록 (" + Campaign.CHAPTERS[listChapter] + " 단계)";
-        else if (level == null) where = "구역 불러오는 중";
-        else if (endless) where = "무한 배달 No. " + endlessSeed;
-        else where = String.format("%s 단계 %02d · %s (씨앗 %d)", Campaign.chapterName(levelIndex), Campaign.stageOf(levelIndex) + 1,
-                level.getName(), Campaign.seed(levelIndex));
-        String info = "버전: 별똥 택배 " + Rules.VERSION
-                + "\n화면: " + where
-                + (level != null && !titleOpen && !levelsOpen ? "\n발사 횟수: " + tries : "")
-                + "\n운영체제: " + System.getProperty("os.name") + " " + System.getProperty("os.version")
-                + "\n자바: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")"
-                + "\n창 크기: " + getWidth() + "×" + getHeight()
-                + String.format(", 화면 배율 %.0f%%", getGraphicsConfiguration() == null ? 100 : getGraphicsConfiguration().getDefaultTransform().getScaleX() * 100);
+        if (titleOpen) where = Lang.t("처음 화면");
+        else if (levelsOpen) where = Lang.f("구역 목록 (%s 단계)", Lang.t(Campaign.CHAPTERS[listChapter]));
+        else if (level == null) where = Lang.t("구역 불러오는 중");
+        else if (endless) where = Lang.f("무한 배달 No. %d", endlessSeed);
+        else where = Lang.f("%s 단계 %02d · %s (씨앗 %d)", Campaign.chapterName(levelIndex), Campaign.stageOf(levelIndex) + 1,
+                Lang.t(level.getName()), Campaign.seed(levelIndex));
+        String info = Lang.t("버전") + ": " + Lang.t("별똥 택배") + " " + Rules.VERSION
+                + "\n" + Lang.t("언어") + ": " + Lang.current().nativeName
+                + "\n" + Lang.t("화면") + ": " + where
+                + (level != null && !titleOpen && !levelsOpen ? "\n" + Lang.t("발사 횟수") + ": " + tries : "")
+                + "\n" + Lang.t("운영체제") + ": " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+                + "\n" + Lang.t("자바") + ": " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")"
+                + "\n" + Lang.t("창 크기") + ": " + getWidth() + "×" + getHeight()
+                + String.format(", %s %.0f%%", Lang.t("화면 배율"), getGraphicsConfiguration() == null ? 100 : getGraphicsConfiguration().getDefaultTransform().getScaleX() * 100);
         SwingUtilities.invokeLater(() -> {      // 버튼을 누른 처리가 끝난 뒤에 창을 연다
             BugReport.open(this, info);
             requestFocusInWindow();
         });
+    }
+
+    /** 언어 고르는 창. 고르면 바로 바뀐다 */
+    protected void openLanguage() {
+        thrusting = false;
+        mouseDown = false;
+        armed = false;
+        SwingUtilities.invokeLater(() -> {
+            LanguagePicker.open(this, this::applyLanguage);
+            requestFocusInWindow();
+        });
+    }
+
+    /** 언어를 바꾸고, 글자가 들어간 미리 그린 그림(처음 화면)과 창 제목을 새로 만든다 */
+    private void applyLanguage(Lang.Code code) {
+        Lang.set(code);
+        Ui.languageChanged();
+        titleLayer.clear();
+        java.awt.Window window = SwingUtilities.getWindowAncestor(this);
+        if (window instanceof JFrame frame) frame.setTitle(Lang.t("별똥 택배"));
+        repaint();
     }
 
     /** 후원 창 */
@@ -425,11 +448,11 @@ public class StarDrop extends ScreenPainter {
                 shake = 13;
                 Sound.crash();
                 boolean swallowed = ship.getCrashedInto() instanceof BlackHole;
-                addFloater(swallowed ? "삼켜졌습니다" : "파손", ship.getX(), ship.getY() - 30, Ui.DANGER);
+                addFloater(Lang.t(swallowed ? "삼켜졌습니다" : "파손"), ship.getX(), ship.getY() - 30, Ui.DANGER);
             }
         } else if (!demo) {
             Sound.lost();
-            addFloater(ship.getSteps() >= Rules.MAX_STEPS ? "연락 두절" : "우주 미아", ship.getX(), ship.getY(), new Color(154, 160, 200));
+            addFloater(Lang.t(ship.getSteps() >= Rules.MAX_STEPS ? "연락 두절" : "우주 미아"), ship.getX(), ship.getY(), new Color(154, 160, 200));
         }
         state = demo ? DEMO_WAIT : DEAD;
         waitTimer = demo ? 1.0 : 0.65;
@@ -562,7 +585,7 @@ public class StarDrop extends ScreenPainter {
     public static void main(String[] args) {
         System.setProperty("sun.java2d.uiScale.enabled", "true");
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("별똥 택배");
+            JFrame frame = new JFrame(Lang.t("별똥 택배"));
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.add(new StarDrop());
             frame.pack();

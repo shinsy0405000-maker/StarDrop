@@ -86,7 +86,8 @@ final class Campaign {
 
     static int stageOf(int index) { return index % STAGES; }
 
-    static String chapterName(int index) { return CHAPTERS[chapterOf(index)]; }
+    /** 단계 이름 (지금 고른 언어로) */
+    static String chapterName(int index) { return Lang.t(CHAPTERS[chapterOf(index)]); }
 
     static int firstTry(int index) { return index < FIRST_TRY.length ? FIRST_TRY[index] : 0; }
 

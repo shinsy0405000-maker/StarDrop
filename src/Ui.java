@@ -1,6 +1,7 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.font.LineMetrics;
 import java.awt.Graphics2D;
 import java.awt.font.TextAttribute;
@@ -11,7 +12,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 색과 글꼴, 글자 그리기 도우미 (웹 버전의 CSS 값과 같은 숫자).
@@ -21,6 +24,9 @@ import java.util.Map;
  *   본문:     IBM Plex Sans KR (보통 400 / 중간 500 / 굵게 700)
  *   숫자·코드: IBM Plex Mono
  * 글꼴 파일을 못 찾으면 자바 기본 글꼴로 그린다.
+ *
+ * 일본어·중국어는 위 글꼴에 가나와 한자가 없어서, 컴퓨터에 깔린 글꼴을 골라 쓴다
+ * (윈도우: Yu Gothic, Microsoft YaHei 등). 언어를 바꾸면 languageChanged() 로 글꼴을 다시 고른다.
  */
 final class Ui {
     private Ui() { }
@@ -65,20 +71,54 @@ final class Ui {
     private static final Map<String, Font> FONTS = new HashMap<>();
     private static final Map<Font, Font> FALLBACK = new HashMap<>();
 
+    // ------------------------------------------------------------ 일본어·중국어 글꼴 (컴퓨터에 깔린 것 중 앞에서부터)
+    private static final String[] JA_FAMILIES = {"Yu Gothic UI", "Yu Gothic", "Meiryo UI", "Meiryo", "MS Gothic",
+        "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans CJK JP", "Noto Sans JP"};
+    private static final String[] ZH_FAMILIES = {"Microsoft YaHei UI", "Microsoft YaHei", "DengXian", "SimHei",
+        "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC"};
+    private static Set<String> installed;
+
+    /** 이 언어를 그릴 글꼴 이름. 한국어·영어는 null (들고 다니는 IBM Plex Sans KR 을 쓴다) */
+    static String familyFor(Lang.Code code) {
+        if (code != Lang.Code.JA && code != Lang.Code.ZH) return null;
+        if (installed == null) {
+            installed = Set.of(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames(Locale.ENGLISH));
+        }
+        for (String name : code == Lang.Code.JA ? JA_FAMILIES : ZH_FAMILIES) if (installed.contains(name)) return name;
+        return Font.SANS_SERIF;                 // 자바 기본 글꼴 (윈도우에서는 여러 나라 글꼴을 이어 붙여 둔 글꼴)
+    }
+
+    /** 이 언어의 본문 글꼴 (언어 고르는 창에서 각 언어 이름을 그 언어 글꼴로 쓸 때) */
+    static Font fontFor(Lang.Code code, float size, int style) {
+        String family = familyFor(code);
+        if (family == null) return font(size, style, false, 0);
+        return new Font(family, style == Font.BOLD ? Font.BOLD : Font.PLAIN, 1).deriveFont(size);
+    }
+
+    /** 언어를 바꿨을 때: 만들어 둔 글꼴을 버리고 새 언어에 맞게 다시 만든다 */
+    static void languageChanged() {
+        FONTS.clear();
+        FALLBACK.clear();
+    }
+
     /** 크기, 굵기(PLAIN / MEDIUM / BOLD), 고정폭 여부, 자간(글자 크기 대비 비율, CSS 의 letter-spacing em)으로 글꼴을 만든다 */
     static Font font(float size, int style, boolean mono, float tracking) {
+        String cjk = mono ? null : familyFor(Lang.current());
         Font base = mono ? MONO : style == Font.BOLD ? BOLD : style == MEDIUM ? MEDIUM_FONT : REGULAR;
+        if (cjk != null) base = new Font(cjk, style == Font.BOLD ? Font.BOLD : Font.PLAIN, 1);
         if (base == null) base = new Font(mono ? Font.MONOSPACED : Font.SANS_SERIF, style == Font.BOLD ? Font.BOLD : Font.PLAIN, 1);
         return make("body/" + mono + "/" + style, base, size, tracking);
     }
 
-    /** 제목용 굵은 글꼴 (Black Han Sans) */
+    /** 제목용 굵은 글꼴 (Black Han Sans, 일본어·중국어는 그 언어 글꼴의 굵은 모양) */
     static Font display(float size, float tracking) {
-        return make("display", DISPLAY != null ? DISPLAY : new Font(Font.SANS_SERIF, Font.BOLD, 1), size, tracking);
+        String cjk = familyFor(Lang.current());
+        Font base = cjk != null ? new Font(cjk, Font.BOLD, 1) : DISPLAY != null ? DISPLAY : new Font(Font.SANS_SERIF, Font.BOLD, 1);
+        return make("display", base, size, tracking);
     }
 
     private static Font make(String kind, Font base, float size, float tracking) {
-        String key = kind + "/" + size + "/" + tracking;
+        String key = Lang.current() + "/" + kind + "/" + size + "/" + tracking;
         Font f = FONTS.get(key);
         if (f == null) {
             f = base.deriveFont(size);
@@ -95,7 +135,9 @@ final class Ui {
     /** 이 글꼴에 없는 글자(고정폭 글꼴의 한글, 별 모양 등)를 대신 그릴 글꼴 — 브라우저처럼 */
     private static Font fallback(Font f) {
         return FALLBACK.computeIfAbsent(f, k -> {
-            Font base = REGULAR != null && k != REGULAR ? REGULAR : new Font(Font.SANS_SERIF, Font.PLAIN, 1);
+            String cjk = familyFor(Lang.current());
+            Font base = cjk != null ? new Font(cjk, Font.PLAIN, 1)
+                    : REGULAR != null && k != REGULAR ? REGULAR : new Font(Font.SANS_SERIF, Font.PLAIN, 1);
             Font fb = base.deriveFont(k.getSize2D());
             if (!fb.canDisplay('★')) fb = new Font(Font.SANS_SERIF, Font.PLAIN, 1).deriveFont(k.getSize2D());
             Object tracking = k.getAttributes().get(TextAttribute.TRACKING);
@@ -161,7 +203,7 @@ final class Ui {
 
     /**
      * 폭 maxW 안에 들어가도록 글을 여러 줄로 나눈다.
-     * 브라우저처럼 띄어쓰기뿐 아니라 한글 글자 사이에서도 줄을 바꿀 수 있다 (마침표 앞은 제외).
+     * 브라우저처럼 띄어쓰기뿐 아니라 한글·가나·한자 글자 사이에서도 줄을 바꿀 수 있다 (마침표 앞은 제외).
      */
     static List<String> wrap(Graphics2D g, String s, Font f, double maxW) {
         List<String> lines = wrapOnce(g, s, f, maxW);
@@ -203,11 +245,22 @@ final class Ui {
         char before = s.charAt(i - 1), here = s.charAt(i);
         if (before == ' ') return here != ' ';
         if (here == ' ' || ".,!?)·%".indexOf(here) >= 0) return false;
-        return hangul(before) && hangul(here);
+        if (NO_BREAK_BEFORE.indexOf(here) >= 0 || NO_BREAK_AFTER.indexOf(before) >= 0) return false;
+        return (hangul(before) && hangul(here)) || ideographic(before) || ideographic(here);
     }
+
+    /** 일본어·중국어에서 줄 맨 앞에 오면 안 되는 글자 (마침표, 닫는 괄호, 작은 가나 등) */
+    private static final String NO_BREAK_BEFORE = "。、，．！？：；）」』】〕・ー～々ゝゞぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ%";
+    /** 줄 맨 끝에 오면 안 되는 글자 (여는 괄호) */
+    private static final String NO_BREAK_AFTER = "（「『【〔";
 
     private static boolean hangul(char c) {
         return c >= 0xAC00 && c <= 0xD7A3;
+    }
+
+    /** 가나, 한자, 전각 문장부호: 앞뒤 어디서나 줄을 바꿀 수 있는 글자 (한글은 한글끼리만, 웹 버전과 같게) */
+    private static boolean ideographic(char c) {
+        return (c >= 0x3000 && c <= 0x30FF) || (c >= 0x3400 && c <= 0x9FFF) || (c >= 0xFF00 && c <= 0xFFEF);
     }
 
     static double clamp(double v, double lo, double hi) { return Math.max(lo, Math.min(hi, v)); }

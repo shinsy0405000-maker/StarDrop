@@ -40,7 +40,7 @@ final class BugReport {
     /** 창을 띄운다. info = 게임이 자동으로 채워 주는 정보(버전, 구역 등) */
     static void open(Component parent, String info) {
         Window owner = SwingUtilities.getWindowAncestor(parent);
-        JDialog dialog = new JDialog(owner, "버그 제보", JDialog.ModalityType.APPLICATION_MODAL);
+        JDialog dialog = new JDialog(owner, Lang.t("버그 제보"), JDialog.ModalityType.APPLICATION_MODAL);
 
         JTextArea what = area(5, false), steps = area(4, false), env = area(6, true);
         steps.setText("1. \n2. \n3. ");
@@ -50,20 +50,20 @@ final class BugReport {
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBackground(Ui.PANEL);
         body.setBorder(BorderFactory.createEmptyBorder(22, 24, 18, 24));
-        body.add(label("버그 제보", Ui.display(26, 0), Ui.INK));
+        body.add(label(Lang.t("버그 제보"), Ui.display(26, 0), Ui.INK));
         body.add(Box.createVerticalStrut(6));
-        body.add(label("이상한 점을 알려 주세요. GitHub 제보 양식이 미리 채워진 채로 열립니다.", Ui.font(13, Font.PLAIN, false, 0), Ui.DIM));
+        body.add(label(Lang.t("이상한 점을 알려 주세요. GitHub 제보 양식이 미리 채워진 채로 열립니다."), Ui.font(13, Font.PLAIN, false, 0), Ui.DIM));
         body.add(Box.createVerticalStrut(16));
-        body.add(field("무엇이 잘못됐나요?", what));
+        body.add(field(Lang.t("무엇이 잘못됐나요?"), what));
         body.add(Box.createVerticalStrut(12));
-        body.add(field("어떻게 하면 다시 생기나요?", steps));
+        body.add(field(Lang.t("어떻게 하면 다시 생기나요?"), steps));
         body.add(Box.createVerticalStrut(12));
-        body.add(field("자동으로 붙는 정보", env));
+        body.add(field(Lang.t("자동으로 붙는 정보"), env));
 
-        JButton send = button("GitHub에 제보하기", true), copy = button("내용 복사", false), close = button("닫기", false);
+        JButton send = button(Lang.t("GitHub에 제보하기"), true), copy = button(Lang.t("내용 복사"), false), close = button(Lang.t("닫기"), false);
         send.addActionListener(e -> {
             if (what.getText().isBlank()) {
-                JOptionPane.showMessageDialog(dialog, "무엇이 잘못됐는지 한 줄이라도 적어 주세요.", "버그 제보", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, Lang.t("무엇이 잘못됐는지 한 줄이라도 적어 주세요."), Lang.t("버그 제보"), JOptionPane.INFORMATION_MESSAGE);
                 what.requestFocusInWindow();
                 return;
             }
@@ -72,12 +72,12 @@ final class BugReport {
                 dialog.dispose();
             } else {                    // 브라우저를 못 열면 주소를 복사해 준다
                 copyToClipboard(url);
-                JOptionPane.showMessageDialog(dialog, "브라우저를 열지 못해서 제보 주소를 복사했습니다.\n브라우저 주소창에 붙여 넣어 주세요.", "버그 제보", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, Lang.t("브라우저를 열지 못해서 제보 주소를 복사했습니다.\n브라우저 주소창에 붙여 넣어 주세요."), Lang.t("버그 제보"), JOptionPane.INFORMATION_MESSAGE);
             }
         });
         copy.addActionListener(e -> {
             copyToClipboard("무엇이 잘못됐나요?\n" + what.getText() + "\n\n어떻게 하면 다시 생기나요?\n" + steps.getText() + "\n\n환경\n" + env.getText());
-            copy.setText("복사했습니다");
+            copy.setText(Lang.t("복사했습니다"));
         });
         close.addActionListener(e -> dialog.dispose());
 

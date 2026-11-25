@@ -65,26 +65,26 @@ final class Donate {
 
     /** 이 금액으로 후원할 수 있으면 null, 안 되면 이유 */
     static String check(int amount) {
-        if (amount < 0) return "금액을 숫자로 적어 주세요.";
-        if (amount < MIN_AMOUNT) return String.format("최소 %,d원부터 후원할 수 있어요.", MIN_AMOUNT);
-        if (amount > MAX_AMOUNT) return String.format("한 번에 %,d원까지 후원할 수 있어요.", MAX_AMOUNT);
+        if (amount < 0) return Lang.t("금액을 숫자로 적어 주세요.");
+        if (amount < MIN_AMOUNT) return Lang.f("최소 %,d원부터 후원할 수 있어요.", MIN_AMOUNT);
+        if (amount > MAX_AMOUNT) return Lang.f("한 번에 %,d원까지 후원할 수 있어요.", MAX_AMOUNT);
         return null;
     }
 
     static void open(Component parent) {
         Window owner = SwingUtilities.getWindowAncestor(parent);
-        JDialog dialog = new JDialog(owner, "후원하기", JDialog.ModalityType.APPLICATION_MODAL);
+        JDialog dialog = new JDialog(owner, Lang.t("후원하기"), JDialog.ModalityType.APPLICATION_MODAL);
 
         JPanel body = new JPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setBackground(Ui.PANEL);
         body.setBorder(BorderFactory.createEmptyBorder(22, 24, 18, 24));
-        body.add(label("후원하기", Ui.display(26, 0), Ui.INK));
+        body.add(label(Lang.t("후원하기"), Ui.display(26, 0), Ui.INK));
         body.add(Box.createVerticalStrut(8));
-        body.add(label("<html>별똥 택배가 재미있었다면 후원으로 응원해 주세요.<br>후원금은 새 구역과 기능을 만드는 데 쓰입니다.</html>",
+        body.add(label("<html>" + Lang.t("별똥 택배가 재미있었다면 후원으로 응원해 주세요.") + "<br>" + Lang.t("후원금은 새 구역과 기능을 만드는 데 쓰입니다.") + "</html>",
                 Ui.font(14, Font.PLAIN, false, 0), Ui.SOFT_INK));
         body.add(Box.createVerticalStrut(18));
-        body.add(label(String.format("금액 (최소 %,d원)", MIN_AMOUNT), Ui.font(13, Font.BOLD, false, 0), Ui.SOFT_INK));
+        body.add(label(Lang.f("금액 (최소 %,d원)", MIN_AMOUNT), Ui.font(13, Font.BOLD, false, 0), Ui.SOFT_INK));
         body.add(Box.createVerticalStrut(8));
 
         // 금액 고르기: 정해진 금액 3개 + 직접 입력
@@ -92,7 +92,7 @@ final class Donate {
         ButtonGroup group = new ButtonGroup();
         JToggleButton[] choices = new JToggleButton[PRESETS.length + 1];
         for (int i = 0; i <= PRESETS.length; i++) {
-            choices[i] = choice(i < PRESETS.length ? String.format("%,d원", PRESETS[i]) : "직접 입력");
+            choices[i] = choice(i < PRESETS.length ? Lang.f("%,d원", PRESETS[i]) : Lang.t("직접 입력"));
             group.add(choices[i]);
             presets.add(choices[i]);
             if (i < PRESETS.length) presets.add(Box.createHorizontalStrut(6));
@@ -130,26 +130,26 @@ final class Donate {
         ImageIcon qrIcon = ready() ? new ImageIcon(QrCode.encode(payUrl()).toImage(6, Color.BLACK, Color.WHITE)) : null;
         body.add(qr);
         body.add(Box.createVerticalStrut(8));
-        JLabel hint = label("<html>휴대폰 카메라나 카카오톡으로 QR을 찍으면 카카오페이 송금 화면이 열려요.</html>",
+        JLabel hint = label("<html>" + Lang.t("휴대폰 카메라나 카카오톡으로 QR을 찍으면 카카오페이 송금 화면이 열려요.") + "</html>",
                 Ui.font(13, Font.PLAIN, false, 0), Ui.SOFT_INK);
         body.add(hint);
 
-        JButton copy = button("링크 복사", true), close = button("닫기", false);
+        JButton copy = button(Lang.t("링크 복사"), true), close = button(Lang.t("닫기"), false);
 
         // 지금 고른 금액 (-1 = 아직 고르지 않음)
         int[] amount = {PRESETS[0]};
         Runnable refresh = () -> {
             String problem = check(amount[0]);
             if (problem != null) {
-                status.setText(amount[0] == -1 && custom.getText().isBlank() ? "금액을 적어 주세요." : problem);
+                status.setText(amount[0] == -1 && custom.getText().isBlank() ? Lang.t("금액을 적어 주세요.") : problem);
                 status.setForeground(Ui.DANGER);
             } else {
-                status.setText(String.format("송금 화면에서 %,d원을 입력해 주세요.", amount[0]));
+                status.setText(Lang.f("송금 화면에서 %,d원을 입력해 주세요.", amount[0]));
                 status.setForeground(Ui.AMBER);
             }
             boolean show = ready() && problem == null;
             qr.setIcon(show ? qrIcon : null);
-            qr.setText(show ? "" : ready() ? "금액을 먼저 골라 주세요" : "후원 링크 준비 중");
+            qr.setText(show ? "" : Lang.t(ready() ? "금액을 먼저 골라 주세요" : "후원 링크 준비 중"));
             copy.setEnabled(show);
         };
         for (int i = 0; i <= PRESETS.length; i++) {
@@ -178,10 +178,10 @@ final class Donate {
             if (check(amount[0]) != null || !ready()) return;     // 버튼이 꺼져 있어야 하지만 한 번 더 확인
             try {
                 Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(payUrl()), null);
-                status.setText("링크를 복사했어요. 휴대폰으로 보내서 열어 주세요.");
+                status.setText(Lang.t("링크를 복사했어요. 휴대폰으로 보내서 열어 주세요."));
                 status.setForeground(Ui.AMBER);
             } catch (Exception ex) {
-                status.setText("복사하지 못했어요: " + payUrl());
+                status.setText(Lang.t("복사하지 못했어요: ") + payUrl());
                 status.setForeground(Ui.DANGER);
             }
         });
