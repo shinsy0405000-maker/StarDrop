@@ -31,6 +31,7 @@ public class StarDrop extends Controls {
         setBackground(Ui.VOID);
         setFocusable(true);
         Progress.load(progress);
+        skin = SkinStore.selected(totalStars());
         installInput();
         showTitle();
         if (!GraphicsEnvironment.isHeadless()) GameLoop.start(this::frame);
@@ -172,6 +173,21 @@ public class StarDrop extends Controls {
         armed = false;
         SwingUtilities.invokeLater(() -> {
             Donate.open(this);
+            requestFocusInWindow();
+        });
+    }
+
+    /** 스킨 고르는 창. 고르면 바로 바뀐다 */
+    protected void openSkins() {
+        thrusting = false;
+        mouseDown = false;
+        armed = false;
+        int stars = totalStars();
+        SwingUtilities.invokeLater(() -> {
+            SkinPicker.open(this, stars, picked -> {
+                skin = picked;
+                repaint();
+            });
             requestFocusInWindow();
         });
     }

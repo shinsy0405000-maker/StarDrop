@@ -63,8 +63,8 @@ abstract class PanelPainter extends TitlePainter {
         }
         int rows = (Campaign.STAGES + cols - 1) / cols;
         double by = gridY + rows * 118 - 10 + 22, bx = padX, bh = 10 + Ui.lineHeight(g, Ui.font(15, Ui.MEDIUM, false, 0)) + 10 + 2;
-        String[] labels = {Lang.t("처음 화면"), Lang.t("무한 배달"), Lang.t("버그 제보"), Lang.t("후원하기")};
-        Runnable[] actions = {this::showTitle, this::startEndless, this::openBugReport, this::openDonate};
+        String[] labels = {Lang.t("처음 화면"), Lang.t("무한 배달"), Lang.t("스킨"), Lang.t("버그 제보"), Lang.t("후원하기")};
+        Runnable[] actions = {this::showTitle, this::startEndless, this::openSkins, this::openBugReport, this::openDonate};
         for (int i = 0; i < labels.length; i++) {
             double bw = Button.widthFor(g, labels[i], null, 15, Ui.MEDIUM, 16);
             out.add(new Button(new Rectangle2D.Double(bx, by, bw, bh), labels[i], null, 15, Ui.MEDIUM, false, false, new Color(14, 15, 38, 217), actions[i]));

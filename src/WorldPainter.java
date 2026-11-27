@@ -171,35 +171,16 @@ abstract class WorldPainter extends GameState {
     }
 
     protected void drawShip(Graphics2D g) {
+        // 소포 모양과 꼬리 색은 고른 스킨(Skin)이 정한다. 기본 스킨은 웹 버전과 같은 주황 혜성
         if (ship != null && state == FLY) {
-            // 꼬리: 넓은 주황 줄기 위에 가는 흰 줄기를 겹쳐서 혜성처럼
-            drawTail(g, 80, 6.5, new int[]{255, 179, 71}, 0.85);
-            drawTail(g, 30, 3, new int[]{255, 243, 208}, 0.9);
+            skin.drawTail(g, trail, anim);
             // 물리 스텝 사이를 이어서 부드럽게 보이게 한다
             double k = stepDebt / Rules.DT, x = prevX + (ship.getX() - prevX) * k, y = prevY + (ship.getY() - prevY) * k;
             if (Math.abs(ship.getX() - prevX) > 40 || Math.abs(ship.getY() - prevY) > 40) { x = ship.getX(); y = ship.getY(); }
-            Paints.glow(g, x, y, 26, new Color(255, 190, 90, 191));
-            Paints.glow(g, x, y, 7, Color.WHITE);
-            g.setColor(Color.WHITE);
-            Paints.circle(g, x, y, 3);
+            skin.drawHead(g, x, y, 26, 7, 3, 191, Math.atan2(ship.getVy(), ship.getVx()), anim);
         } else if (state == AIM || (state == DEMO_WAIT && ship == null)) {
             double pulse = 1 + Math.sin(anim * 4) * 0.12, x = level.getStartX(), y = level.getStartY();
-            Paints.glow(g, x, y, 22 * pulse, new Color(255, 190, 90, 179));
-            Paints.glow(g, x, y, 6.5, Color.WHITE);
-            g.setColor(Color.WHITE);
-            Paints.circle(g, x, y, 2.8);
-        }
-    }
-
-    protected void drawTail(Graphics2D g, int length, double width, int[] rgb, double alpha) {
-        int n = trail.size(), from = Math.max(1, n - length);
-        for (int i = from; i < n; i++) {
-            double[] a = trail.get(i - 1), b = trail.get(i);
-            if (a == null || b == null) continue;
-            double t = (i - from) / (double) (n - from);
-            g.setColor(new Color(rgb[0], rgb[1], rgb[2], (int) (255 * alpha * t * t)));
-            g.setStroke(new BasicStroke((float) (0.6 + width * t), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.draw(new Line2D.Double(a[0], a[1], b[0], b[1]));
+            skin.drawHead(g, x, y, 22 * pulse, 6.5, 2.8, 179, aimAngle, anim);
         }
     }
 }

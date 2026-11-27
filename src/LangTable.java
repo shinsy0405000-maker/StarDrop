@@ -238,6 +238,51 @@ final class LangTable {
 
         // 언어 고르는 창
         add("게임에서 쓸 언어를 고르세요.", "Choose the language for the game.", "ゲームで使う言語を選んでください。", "请选择游戏语言。");
+        // 스킨
+        add("스킨", "Skins", "スキン", "皮肤");
+        add("기본 소포", "Classic Parcel", "いつもの小包", "经典包裹");
+        add("민트 혜성", "Mint Comet", "ミント彗星", "薄荷彗星");
+        add("벚꽃 유성", "Cherry Blossom Meteor", "桜の流れ星", "樱花流星");
+        add("얼음 혜성", "Ice Comet", "氷の彗星", "冰晶彗星");
+        add("태양 불꽃", "Solar Flare", "太陽フレア", "太阳耀斑");
+        add("은하수 소포", "Milky Way Parcel", "天の川の小包", "银河包裹");
+        add("황금 택배", "Golden Delivery", "黄金の宅配便", "黄金快递");
+        add("소포와 꼬리 모양을 바꿔요.", "Change how your parcel and its tail look.", "小包と尾の見た目を変えられます。", "更换包裹和尾迹的外观。");
+        add("모은 별 ★ %d / %d", "Stars collected ★ %d / %d", "集めた星 ★ %d / %d", "已收集星星 ★ %d / %d");
+        add("사용 중", "In use", "使用中", "使用中");
+        add("고르기", "Select", "選ぶ", "选择");
+        add("★ %d개 필요", "Needs ★ %d", "★ %d個で解放", "需要 ★ %d");
+        add("%,d원 · 코드로 열기", "₩%,d · unlock with a code", "%,dウォン・コードで解放", "%,d韩元 · 用兑换码解锁");
+        add("업적 보상", "Achievement reward", "実績報酬", "成就奖励");
+        add("이제 「%s」 스킨을 써요.", "Now using the \"%s\" skin.", "「%s」スキンに変えました。", "已换成「%s」皮肤。");
+        add("별을 %d개 더 모으면 열려요.", "Collect %d more stars to unlock it.", "あと星を%d個集めると解放されます。", "再收集%d颗星星即可解锁。");
+        add("업적을 달성하면 열려요.", "Unlocks when you earn an achievement.", "実績を達成すると解放されます。", "达成成就后解锁。");
+        add("「%s」 열기 · %,d원", "Unlock \"%s\" · ₩%,d", "「%s」を解放・%,dウォン", "解锁「%s」· %,d韩元");
+        add("1. QR을 찍어 카카오페이로 %,d원을 보내 주세요.", "1. Scan the QR code and send ₩%,d with KakaoPay.",
+            "1. QRを読み取り、カカオペイで%,dウォンを送金してください。", "1. 扫描二维码，用KakaoPay转账%,d韩元。");
+        add("2. 송금 메시지에 아래 기기 번호를 적어 주세요.", "2. Write the device number below in the transfer message.",
+            "2. 送金メッセージに下の端末番号を書いてください。", "2. 请在转账留言中填写下面的设备编号。");
+        add("복사", "Copy", "コピー", "复制");
+        add("3. GitHub에서 코드를 요청하면, 송금을 확인한 뒤 댓글로 코드를 보내 드려요.",
+            "3. Request a code on GitHub. Once the transfer is confirmed, the code will be posted as a comment.",
+            "3. GitHubでコードを申請すると、送金を確認したあとコメントでコードをお送りします。",
+            "3. 在GitHub上申请兑换码，确认转账后会在评论中发送兑换码。");
+        add("GitHub에서 코드 요청", "Request a Code on GitHub", "GitHubでコードを申請", "在GitHub申请兑换码");
+        add("받은 코드", "Your code", "受け取ったコード", "收到的兑换码");
+        add("코드 넣기", "Redeem", "コードを入力", "兑换");
+        add("코드는 이 컴퓨터에서만 열려요. 송금은 개발자가 직접 확인해서 조금 걸릴 수 있어요.",
+            "Codes only work on this computer. Transfers are checked by hand, so it may take a while.",
+            "コードはこのパソコンでのみ使えます。送金は開発者が手で確認するため、少し時間がかかることがあります。",
+            "兑换码只能在这台电脑上使用。转账由开发者手动确认，可能需要一些时间。");
+        add("기기 번호를 복사했어요.", "Device number copied.", "端末番号をコピーしました。", "设备编号已复制。");
+        add("브라우저를 열지 못해서 주소를 복사했어요.", "Couldn't open the browser, so the address was copied.",
+            "ブラウザを開けなかったので、アドレスをコピーしました。", "无法打开浏览器，已复制链接地址。");
+        add("코드를 붙여 넣어 주세요.", "Please paste your code.", "コードを貼り付けてください。", "请粘贴兑换码。");
+        add("맞지 않는 코드예요. 이 컴퓨터의 기기 번호로 받은 코드인지 확인해 주세요.",
+            "That code doesn't match. Make sure it was issued for this computer's device number.",
+            "コードが一致しません。このパソコンの端末番号で発行されたコードか確認してください。",
+            "兑换码不匹配。请确认它是用这台电脑的设备编号申请的。");
+        add("「%s」 스킨이 열렸어요! 고마워요.", "The \"%s\" skin is unlocked! Thank you.", "「%s」スキンが解放されました！ありがとうございます。", "「%s」皮肤已解锁！谢谢支持。");
         return table;
     }
 }

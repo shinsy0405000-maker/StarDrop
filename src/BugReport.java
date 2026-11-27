@@ -129,11 +129,11 @@ final class BugReport {
                 + "&title=" + encode(title) + "&what=" + encode(what) + "&steps=" + encode(steps) + "&env=" + encode(env);
     }
 
-    private static String encode(String s) {
+    static String encode(String s) {
         return URLEncoder.encode(s, StandardCharsets.UTF_8).replace("+", "%20");
     }
 
-    private static boolean browse(String url) {
+    static boolean browse(String url) {
         try {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                 Desktop.getDesktop().browse(new URI(url));

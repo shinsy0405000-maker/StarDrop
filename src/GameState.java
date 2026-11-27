@@ -38,6 +38,7 @@ abstract class GameState extends JPanel {
 
     // 조준과 비행
     protected double aimAngle, aimPower = 0.5;
+    protected Skin skin = Skin.CLASSIC;                                        // 고른 소포 스킨
     protected boolean previewDirty = true;
     protected transient Ship ship;
     protected double prevX, prevY;          // 한 스텝 전 위치 (부드럽게 그리기 위해)
@@ -88,11 +89,19 @@ abstract class GameState extends JPanel {
     protected abstract void openBugReport();
     protected abstract void openDonate();
     protected abstract void openLanguage();
+    protected abstract void openSkins();
 
     /** 아직 배달하지 않은 첫 구역 (전부 했으면 0) */
     protected int firstUndone() {
         for (int i = 0; i < progress.length; i++) if (progress[i] == 0) return i;
         return 0;
+    }
+
+    /** 모든 구역에서 모은 별 (스킨을 여는 데 쓴다) */
+    protected int totalStars() {
+        int n = 0;
+        for (int p : progress) n += Math.max(0, p - 1);
+        return n;
     }
 
     protected int starCount() {

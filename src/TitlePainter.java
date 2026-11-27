@@ -66,10 +66,10 @@ abstract class TitlePainter extends HudPainter {
         for (int i = 0; i < lede.size(); i++) Ui.text(g, lede.get(i), padX, Ui.baseline(g, ledeFont, ledeTop + i * ledeLine, ledeLine), ledeFont, Ui.SOFT_INK);
 
         // 메뉴 버튼
-        String[] labels = {Lang.t("배달 시작"), Lang.t("구역 목록"), Lang.t("무한 배달")};
-        Runnable[] actions = {() -> startCampaign(firstUndone()), this::showLevels, this::startEndless};
+        String[] labels = {Lang.t("배달 시작"), Lang.t("구역 목록"), Lang.t("무한 배달"), Lang.t("스킨")};
+        Runnable[] actions = {() -> startCampaign(firstUndone()), this::showLevels, this::startEndless, this::openSkins};
         double bx = padX;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < labels.length; i++) {
             double bw = Button.widthFor(g, labels[i], null, 16, i == 0 ? Font.BOLD : Ui.MEDIUM, 22);
             out.add(new Button(new Rectangle2D.Double(bx, menuTop, bw, menuH), labels[i], null, 16, Ui.MEDIUM, i == 0, false, new Color(14, 15, 38, 217), actions[i]));
             bx += bw + 10;
