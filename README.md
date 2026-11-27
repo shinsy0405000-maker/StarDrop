@@ -34,6 +34,18 @@
 후원은 **카카오페이 송금코드**로 받습니다. 금액을 고르면 창에 QR이 나오고, 휴대폰 카메라나 카카오톡으로 찍으면 카카오페이 송금 화면이 열립니다.
 게임 없이 후원하려면 → **[후원 페이지 (DONATE.md)](DONATE.md)** 에서 QR을 찍어 주세요. 저장소 위쪽 **Sponsor** 버튼으로도 갈 수 있어요.
 
+## 버전 규칙
+
+버전은 `큰.중간.작은` 세 자리로 적습니다 (예: 1.2.0).
+
+| 자리 | 언제 올리나 | 예 |
+|---|---|---|
+| 맨 앞 (큰) | 콜라보 테마로 새 스테이지를 넣는 것 같은 큰 업데이트 | 1.2.0 → **2**.0.0 |
+| 가운데 (중간) | 그래픽 바꾸기, 새 기능처럼 중간 크기 업데이트 | 1.2.0 → 1.**3**.0 |
+| 맨 뒤 (작은) | 보안, 버그 수정 같은 작은 업데이트 | 1.2.0 → 1.2.**1** |
+
+앞자리를 올리면 뒷자리는 0으로 돌아갑니다. 지금 버전은 `src/Rules.java`의 `VERSION`에 적혀 있습니다.
+
 ## 직접 빌드해서 실행하기
 
 JDK 21 이상이 필요합니다.
@@ -59,6 +71,7 @@ IntelliJ IDEA에서는 이 폴더를 열고 `src/StarDrop.java`의 `main`을 실
 | M | 소리 켜기/끄기 |
 | F1 | 버그 제보 창 |
 | F3 | FPS 표시 |
+| F4 | 빛 번짐 효과 끄기/켜기 (느린 컴퓨터용) |
 | Esc | 처음 화면 |
 
 화면 오른쪽 위의 버튼(다시 조준, 정답 방향 보기, 소리, 구역 목록)으로도 같은 일을 할 수 있습니다.
@@ -71,6 +84,7 @@ IntelliJ IDEA에서는 이 폴더를 열고 `src/StarDrop.java`의 `main`을 실
 - **별 3개**: 자동 풀이기가 찾은 정답 궤도 위에 놓이므로, 별 3개를 모두 얻는 길이 반드시 있습니다.
 - **기록 저장**: 구역마다 얻은 별 수가 저장되어, 구역 목록의 단계 탭에서 볼 수 있습니다. 앞 구역을 끝내야 다음 구역이 열립니다.
 - **소리**: 추진음과 효과음을 음원 파일 없이 코드로 직접 계산해 만듭니다.
+- **그래픽**: 은하수 띠와 성운, 흐르는 별 두 겹(마우스에 따라 움직이는 시차), 유성, 빛 번짐(블룸), 화면 가장자리 어둡게, 화면 전환 페이드, 버튼 애니메이션. 모두 라이브러리 없이 직접 계산합니다.
 
 ## 핵심 원리
 
@@ -93,22 +107,35 @@ IntelliJ IDEA에서는 이 폴더를 열고 `src/StarDrop.java`의 `main`을 실
 | 인터페이스 | `Drawable`: 화면에 그릴 대상을 반복문 하나로 그림 |
 | 상속 | `GravityBody`(추상 클래스) ← `Planet`, `BlackHole`, `Repulsor` |
 | 상속 | `Widget`(추상 클래스) ← `Button`, `LevelTile`: 화면 위의 클릭할 수 있는 요소 |
-| 상속 | `GameState` ← `WorldPainter` ← `ScreenPainter` ← `StarDrop`: 게임 본체를 상태, 우주 그리기, UI 그리기, 진행·입력 네 층으로 나눔 |
+| 상속 | `GameState` ← `WorldPainter` ← `HudPainter` ← `TitlePainter` ← `PanelPainter` ← `ScreenPainter` ← `Flight` ← `Controls` ← `StarDrop`: 게임 본체를 기능별로 아홉 층으로 나눔. 한 파일에 한 가지 일만 있어서 찾기 쉬움 |
+| 추상 메서드 | 아래 층(`Flight`)은 `aimWithKeys()`의 이름만 정해 두고, 위 층(`Controls`)이 내용을 채움 |
 | 상속 | `MouseAdapter`, `KeyAdapter`를 상속해 필요한 메서드만 재정의 |
 
 ## 폴더 구성
 
 ```
 src/
-  StarDrop.java        게임 진행, 물리 한 스텝, 입력, main  ← 여기서 실행
-  ScreenPainter.java   화면 위 UI 그리기 (HUD, 처음 화면, 구역 목록, 영수증)
-  WorldPainter.java    우주 화면 그리기 (배경, 천체, 별, 조준선, 소포)
-  GameState.java       게임 상태 변수
+  ── 게임 본체: 아래 층부터 위 층으로 상속 (StarDrop 이 맨 위) ──
+  GameState.java       1. 게임 상태 변수 (층 전체 설명도 여기 있음)
+  WorldPainter.java    2. 우주 화면 그리기 (천체, 별, 조준선, 소포)
+  HudPainter.java      3. 게임 화면 위 정보 (운송장, 도구 버튼, 연료, 안내)
+  TitlePainter.java    4. 처음 화면
+  PanelPainter.java    5. 구역 목록, 배달 완료 영수증, "구역 만드는 중"
+  ScreenPainter.java   6. 한 프레임을 그리는 순서 (paintComponent, 화면 효과)
+  Flight.java          7. 비행 진행 (발사, 물리 한 스텝, 도착·충돌)
+  Controls.java        8. 마우스·키보드 입력
+  StarDrop.java        9. 화면 전환, 구역 불러오기, 창 열기, main  ← 여기서 실행
+
+  ── 게임 본체를 돕는 파일 ──
+  BackgroundPainter.java  배경 한 장 그리기 (성운, 은하수 띠, 먼지 띠, 큰 별, 비네트)
+  GameLoop.java        1초에 60번 화면을 다시 그리는 반복
+  Progress.java        진행 상황(구역마다 별 개수) 저장·불러오기
+  TextWrap.java        긴 글을 폭에 맞게 여러 줄로 나누기 (한국어·영어·일본어·중국어)
 
   Ship.java            날아가는 소포 (가속도 → 속도 → 위치)
   Level.java           구역 하나 (행성 겉모습, 반짝이는 별 위치도 여기서 정함)
   LevelConfig.java     구역에 무엇을 몇 개 넣을지
-  Campaign.java        태양계 9단계 × 16구역 구성
+  Campaign.java        태양계 9단계 × 16구역 구성, 구역 안내 문구
   LevelGenerator.java  구역 자동 생성 (웹 버전을 그대로 옮김)
   Mulberry32.java      웹과 같은 난수 생성기
   JsMath.java          웹과 결과가 똑같은 수학 함수 (sin, cos, atan2, hypot)
@@ -122,12 +149,15 @@ src/
   Drawable.java        화면에 그릴 수 있는 것 (인터페이스)
   Widget.java  Button.java  LevelTile.java   클릭할 수 있는 화면 요소
   Ui.java  Paints.java  Particle.java  Sound.java   글자·색·그리기 도우미, 불꽃, 소리
+  SpaceLayer.java      흐르는 별 두 겹(시차)과 유성
+  PostFx.java          화면 효과: 빛 번짐(블룸), 페이드
   ImageCache.java  CachedImage.java   미리 그려 두는 그림(캐시): 배경, 처음 화면, 빛 번짐, 행성
   AdditiveComposite.java   빛을 더하는 그리기 방식 (성운, 별)
   BugReport.java       버그 제보 창 (GitHub 제보 양식을 미리 채워서 연다)
   Donate.java          후원 창 (최소 5,000원, 카카오페이 송금 QR을 보여 준다)
   QrCode.java          QR 코드 만들기 (라이브러리 없이 직접 구현)
-  Lang.java            언어 설정과 번역 표 (한국어 → English, 日本語, 中文)
+  Lang.java            언어 설정, 번역 찾기 (Lang.t, Lang.f)
+  LangTable.java       번역 표 (한국어 → English, 日本語, 中文)
   LanguagePicker.java  언어 고르는 창
   fonts/               웹과 같은 글꼴 (Black Han Sans, IBM Plex Sans KR, IBM Plex Mono — SIL Open Font License, OFL-*.txt)
 .github/ISSUE_TEMPLATE/bug_report.yml   GitHub 버그 제보 양식
@@ -138,6 +168,34 @@ web/index.html         처음에 만든 웹 버전 (브라우저로 열면 실�
 ```
 
 ## 개발 로그
+
+### 2026-11-27 — 1.2.0 배포: 코드 정리 (파일 나누기)
+- **v1.2.0 배포** (`Rules.VERSION = "1.2.0"`): 아래 그래픽 업그레이드, 배경음 제거와 이 코드 정리가 들어간 버전
+- **버전 규칙**을 정함 (위 "버전 규칙" 참고): 작은 수정은 맨 뒤, 중간 업데이트는 가운데, 콜라보 테마·새 스테이지는 맨 앞
+- **긴 파일을 기능별로 나눔** — 코드를 읽기 쉽게, 게임 내용과 화면은 그대로
+  - 게임 본체 4층 → 9층: `ScreenPainter`(UI 전부)를 `HudPainter` · `TitlePainter` · `PanelPainter` · `ScreenPainter`로,
+    `StarDrop`(진행·입력 전부)을 `Flight` · `Controls` · `StarDrop`으로 나눔
+  - 배경 한 장 그리기 → `BackgroundPainter`, 화면 다시 그리기 반복 → `GameLoop`, 저장·불러오기 → `Progress`
+  - 번역 표 → `LangTable`, 줄 나누기 → `TextWrap`, 구역 안내 문구 → `Campaign.tip()`, 버그 제보 정보 → `BugReport.describe()`
+  - 쓰지 않는 import 정리, 층마다 무슨 일을 하는지 맨 위 주석에 적음
+- **확인**: 난수를 고정한 옛 코드와 새 코드로 처음 화면·구역 목록·조준·비행·배달 완료·대화 창을 네 언어로 찍어
+  32장 모두 픽셀까지 똑같음. 속도도 그대로 (1920×1080 한 프레임 약 8~9ms)
+
+### 2026-11-25 — 그래픽 업그레이드 (배경 우주, 화면 효과)
+웹 버전과 똑같이 맞춰 둔 그림 위에, 웹에는 없는 효과를 더했습니다.
+- **배경 우주** (`BackgroundPainter.paintDeepSpace`, `SpaceLayer`)
+  - 화면을 비스듬히 가로지르는 은하수 띠, 길쭉한 성운 덩어리, 빛을 가리는 어두운 먼지 띠, 십자 빛살이 있는 큰 별
+  - 흐르는 별 두 겹: 뒤 겹은 느리게, 앞 겹은 빠르게 흐르고 마우스를 움직이면 서로 다르게 밀려서 깊이가 느껴짐(시차)
+  - 2.5~7.5초마다 화면을 가로지르는 유성
+  - 원래 배경(웹과 같은 성운·별 배치)은 그대로 두고, 따로 굴리는 난수로 위에 더함
+- **화면 효과** (`PostFx`)
+  - 빛 번짐(블룸): 밝은 곳(소포, 별, 배달지, 유성)이 주변으로 은은하게 번짐. 화면을 1/8로 줄여 밝은 곳만 골라 흐리게 한 뒤 다시 늘려 섞음
+  - 화면 가장자리 어둡게(비네트): 배경 그림에 미리 넣어서 매 프레임 비용 없음
+  - 새 구역이 나타날 때 검은 화면에서 밝아지는 페이드, 처음 화면·구역 목록은 서서히, 영수증은 살짝 떠오르며 나타남
+- **버튼**: 마우스를 올리면 0.1초에 걸쳐 노랗게 물들고 1.5px 떠오르며 둘레가 빛남. 노란 버튼은 몇 초마다 빛이 훑고 지나감. 구역 칸도 같은 방식
+- **속도**: 1920×1080에서 한 프레임 약 10ms(빛 번짐 끔 4ms). 처음엔 30ms가 넘어서
+  확대 그리기를 픽셀 배열로 직접 하고, 빛이 없는 칸은 건너뛰고, 비네트를 배경에 미리 넣어 줄임
+- 느린 컴퓨터에서는 **F4** 로 빛 번짐을 끌 수 있음
 
 ### 2026-11-25 — 배경음 제거
 - 게임 내내 깔리던 "웅" 하는 배경음(7개 음의 화음)을 뺌 (`Sound`)
