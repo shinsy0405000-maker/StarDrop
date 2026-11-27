@@ -116,6 +116,144 @@ final class LangTable {
         add("혼잡 구간", "Congestion", "混雑区間", "拥堵路段");
         add("마지막 소포", "The Last Parcel", "最後の小包", "最后的包裹");
 
+        // 구역 이름: 화성 ~ 태양 (Campaign.NAMES)
+        // 화성
+        add("붉은 모래바람", "Red Dust Storm", "赤い砂嵐", "红色沙尘暴");
+        add("협곡 우회로", "Canyon Detour", "峡谷の回り道", "峡谷绕行");
+        add("포보스 그림자", "Phobos Shadow", "フォボスの影", "火卫一之影");
+        add("세 개의 분화구", "Three Craters", "三つのクレーター", "三座陨石坑");
+        add("데이모스 시간표", "Deimos Timetable", "ダイモスの時刻表", "火卫二时刻表");
+        add("녹슨 구멍", "Rusty Hole", "錆びた穴", "锈色深洞");
+        add("먼지 회오리", "Dust Devil", "塵旋風", "尘卷风");
+        add("계곡 지름길", "Valley Shortcut", "谷の近道", "峡谷捷径");
+        add("붉은 지평선", "Red Horizon", "赤い地平線", "红色地平线");
+        add("극관 바람", "Polar Wind", "極冠の風", "极冠之风");
+        add("기지 환승역", "Base Transfer", "基地の乗換駅", "基地换乘站");
+        add("두 달의 줄다리기", "Moon Tug-of-War", "二つの月の綱引き", "双月拔河");
+        add("포보스와 데이모스", "Phobos & Deimos", "フォボスとダイモス", "火卫一与火卫二");
+        add("낭떠러지 지름길", "Cliffside Shortcut", "崖っぷちの近道", "悬崖捷径");
+        add("착륙선 정체", "Lander Traffic", "着陸船の渋滞", "着陆舱拥堵");
+        add("올림푸스 정상", "Olympus Summit", "オリンポスの頂", "奥林匹斯之巅");
+        // 금성
+        add("노란 구름 속", "Into Yellow Clouds", "黄色い雲の中", "黄云之中");
+        add("산성비 우회", "Acid Rain Detour", "酸性雨の回り道", "绕开酸雨");
+        add("새벽별 그림자", "Morning Star Shade", "明けの明星の影", "晨星之影");
+        add("세 개의 화산", "Three Volcanoes", "三つの火山", "三座火山");
+        add("거꾸로 도는 하루", "Backward Day", "逆回りの一日", "逆转的一天");
+        add("압력 함정", "Pressure Trap", "気圧の罠", "气压陷阱");
+        add("뜨거운 바람", "Hot Wind", "熱風", "热风");
+        add("구름 터널", "Cloud Tunnel", "雲のトンネル", "云中隧道");
+        add("끓는 지평선", "Boiling Horizon", "沸く地平線", "沸腾地平线");
+        add("초회전 바람", "Super-Rotation", "超回転の風", "超级自转风");
+        add("구름 정거장", "Cloud Station", "雲の停留所", "云端驿站");
+        add("밀고 당기는 대기", "Tug of Air", "押し引く大気", "推拉的大气");
+        add("쌍둥이 번개", "Twin Lightning", "双子の稲妻", "双子闪电");
+        add("황산 지름길", "Acid Shortcut", "硫酸の近道", "硫酸捷径");
+        add("짙은 안개 구간", "Thick Fog Zone", "濃霧区間", "浓雾路段");
+        add("금성의 문", "Venus Gate", "金星の門", "金星之门");
+        // 수성
+        add("태양 곁 배달", "Sunside Delivery", "太陽のそばへ", "太阳旁的配送");
+        add("그늘진 길", "Shady Path", "日陰の道", "背阴小路");
+        add("칼로리스 그림자", "Caloris Shadow", "カロリスの影", "卡洛里斯之影");
+        add("세 개의 구덩이", "Three Pits", "三つの穴", "三个深坑");
+        add("빠른 공전", "Fast Orbit", "速い公転", "快速公转");
+        add("깊은 우물", "Deep Well", "深い井戸", "深井");
+        add("태양풍", "Solar Wind", "太陽風", "太阳风");
+        add("낮과 밤 사이", "Day and Night", "昼と夜の間", "昼夜之间");
+        add("타오르는 경계", "Burning Edge", "燃える境界", "燃烧边界");
+        add("열기 역풍", "Heat Headwind", "熱の逆風", "热浪逆风");
+        add("그늘 환승역", "Shade Station", "日陰の乗換駅", "阴影换乘站");
+        add("두 개의 소용돌이", "Two Whirlpools", "二つの渦", "两个漩涡");
+        add("쌍둥이 구멍", "Twin Holes", "双子の穴", "双子黑洞");
+        add("녹는 지름길", "Melting Shortcut", "溶ける近道", "熔化的捷径");
+        add("근일점 혼잡", "Perihelion Rush", "近日点の混雑", "近日点拥堵");
+        add("수성의 끝", "Mercury's End", "水星の果て", "水星尽头");
+        // 목성
+        add("거인의 품", "Giant's Embrace", "巨人の懐", "巨人怀抱");
+        add("줄무늬 우회로", "Striped Detour", "縞模様の回り道", "条纹绕行");
+        add("이오의 그림자", "Io's Shadow", "イオの影", "木卫一之影");
+        add("네 개의 우물", "Four Wells", "四つの井戸", "四口井");
+        add("갈릴레이 시계", "Galileo's Clock", "ガリレオの時計", "伽利略时钟");
+        add("대적점", "Great Red Spot", "大赤斑", "大红斑");
+        add("유로파 반발", "Europa Rebound", "エウロパの反発", "木卫二反弹");
+        add("가니메데 지름길", "Ganymede Shortcut", "ガニメデの近道", "木卫三捷径");
+        add("폭풍의 눈", "Eye of the Storm", "嵐の目", "风暴之眼");
+        add("제트기류", "Jet Stream", "ジェット気流", "急流");
+        add("칼리스토 환승역", "Callisto Station", "カリストの乗換駅", "木卫四换乘站");
+        add("거인의 줄다리기", "Giant Tug-of-War", "巨人の綱引き", "巨人拔河");
+        add("달 행렬", "Moon Parade", "月の行列", "卫星巡游");
+        add("고리 속 지름길", "Ring Shortcut", "リングの近道", "光环捷径");
+        add("위성 러시아워", "Moon Rush Hour", "衛星ラッシュ", "卫星高峰期");
+        add("목성의 왕관", "Jupiter's Crown", "木星の王冠", "木星之冠");
+        // 토성
+        add("고리 입구", "Ring Gate", "環の入り口", "光环入口");
+        add("고리 둘레길", "Around the Rings", "環のまわり道", "环绕光环");
+        add("타이탄 그림자", "Titan's Shadow", "タイタンの影", "土卫六之影");
+        add("세 개의 고리", "Three Rings", "三つの環", "三道光环");
+        add("엔셀라두스 시계", "Enceladus Clock", "エンケラドスの時計", "土卫二时钟");
+        add("육각 폭풍", "Hexagon Storm", "六角形の嵐", "六边形风暴");
+        add("얼음 튕김", "Ice Bounce", "氷の跳ね返り", "冰面反弹");
+        add("고리 틈 지름길", "Gap Shortcut", "隙間の近道", "缝隙捷径");
+        add("얼음 지평선", "Icy Horizon", "氷の地平線", "冰之地平线");
+        add("고리 바람", "Ring Wind", "環の風", "光环之风");
+        add("미마스 환승역", "Mimas Station", "ミマスの乗換駅", "土卫一换乘站");
+        add("얼음과 불꽃", "Ice and Fire", "氷と炎", "冰与火");
+        add("양치기 달", "Shepherd Moons", "羊飼い衛星", "牧羊犬卫星");
+        add("얼음 조각 사이", "Between Ice Shards", "氷のかけらの間", "冰屑之间");
+        add("고리 정체", "Ring Traffic", "環の渋滞", "光环拥堵");
+        add("카시니 틈", "Cassini Division", "カッシーニの間隙", "卡西尼缝");
+        // 천왕성
+        add("누운 행성", "Sideways Planet", "横倒しの惑星", "横躺的行星");
+        add("기울어진 길", "Tilted Road", "傾いた道", "倾斜之路");
+        add("미란다 그림자", "Miranda's Shadow", "ミランダの影", "天卫五之影");
+        add("푸른 우물 셋", "Three Blue Wells", "三つの青い井戸", "三口蓝井");
+        add("42년의 낮", "42-Year Day", "42年の昼", "42年的白昼");
+        add("차가운 구멍", "Cold Hole", "冷たい穴", "寒冷深洞");
+        add("옆바람", "Crosswind", "横風", "侧风");
+        add("극지 통로", "Polar Passage", "極地の通路", "极地通道");
+        add("얼어붙은 지평선", "Frozen Horizon", "凍った地平線", "冰封地平线");
+        add("메탄 역풍", "Methane Headwind", "メタンの逆風", "甲烷逆风");
+        add("티타니아 환승역", "Titania Station", "ティタニアの乗換駅", "天卫三换乘站");
+        add("기울어진 줄다리기", "Tilted Tug-of-War", "傾いた綱引き", "倾斜拔河");
+        add("쌍둥이 얼음달", "Twin Ice Moons", "双子の氷の月", "双子冰卫星");
+        add("뒤집힌 지름길", "Flipped Shortcut", "逆さの近道", "颠倒的捷径");
+        add("자기장 혼잡", "Magnetic Jam", "磁場の渋滞", "磁场拥堵");
+        add("천왕성의 고리", "Uranus Rings", "天王星の環", "天王星光环");
+        // 해왕성
+        add("푸른 끝자락", "Blue Frontier", "青い果て", "蓝色边疆");
+        add("먼 길", "The Far Road", "遠い道", "漫长远路");
+        add("트리톤 그림자", "Triton's Shadow", "トリトンの影", "海卫一之影");
+        add("깊은 바다 셋", "Three Deep Seas", "三つの深海", "三片深海");
+        add("165년의 공전", "165-Year Orbit", "165年の公転", "165年公转");
+        add("대암점", "Great Dark Spot", "大暗斑", "大黑斑");
+        add("초음속 바람", "Supersonic Wind", "超音速の風", "超音速风");
+        add("얼음 화산 통로", "Geyser Passage", "氷火山の通路", "冰火山通道");
+        add("폭풍 지평선", "Storm Horizon", "嵐の地平線", "风暴地平线");
+        add("거꾸로 부는 바람", "Retrograde Wind", "逆行する風", "逆行之风");
+        add("네레이드 환승역", "Nereid Station", "ネレイドの乗換駅", "海卫二换乘站");
+        add("바람과 구멍", "Wind and Void", "風と穴", "风与虚空");
+        add("쌍둥이 폭풍", "Twin Storms", "双子の嵐", "双子风暴");
+        add("다이아몬드 비", "Diamond Rain", "ダイヤモンドの雨", "钻石雨");
+        add("폭풍 정체", "Storm Jam", "嵐の渋滞", "风暴拥堵");
+        add("태양계 끝 우체국", "Edge Post Office", "果ての郵便局", "边境邮局");
+        // 태양
+        add("코로나 진입", "Into the Corona", "コロナ突入", "进入日冕");
+        add("플레어 우회로", "Flare Detour", "フレアの回り道", "绕开耀斑");
+        add("흑점 그늘", "Sunspot Shade", "黒点の陰", "黑子阴影");
+        add("세 개의 불기둥", "Three Pillars", "三本の火柱", "三根火柱");
+        add("자전 시간표", "Spin Timetable", "自転の時刻表", "自转时刻表");
+        add("흑점 지대", "Sunspot Zone", "黒点地帯", "黑子地带");
+        add("홍염", "Prominence", "プロミネンス", "日珥");
+        add("자기 고리 지름길", "Loop Shortcut", "磁気ループの近道", "磁环捷径");
+        add("광구의 지평선", "Photosphere Edge", "光球の地平線", "光球地平线");
+        add("정면 태양풍", "Solar Gale", "太陽風の正面", "正面太阳风");
+        add("핵융합 환승역", "Fusion Station", "核融合の乗換駅", "核聚变换乘站");
+        add("불과 어둠", "Fire and Dark", "炎と闇", "火与暗");
+        add("쌍둥이 플레어", "Twin Flares", "双子のフレア", "双子耀斑");
+        add("불꽃 지름길", "Blazing Shortcut", "炎の近道", "烈焰捷径");
+        add("코로나 폭풍", "Coronal Storm", "コロナ嵐", "日冕风暴");
+        add("마지막 불꽃", "The Final Flame", "最後の炎", "最后的火焰");
+
         // 안내 문구 (지구 단계)
         add("마우스를 움직여 방향과 세기를 정하고, 클릭하면 발사합니다. 점선은 궤도의 앞부분만 보여 줍니다.",
             "Move the mouse to set direction and power, then click to launch. The dotted line shows only the start of the orbit.",

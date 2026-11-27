@@ -40,7 +40,11 @@ class LevelTile extends Widget {
         Font nf = Ui.font(12, Font.PLAIN, true, 0), tf = Ui.font(17, Font.BOLD, false, 0), sf = Ui.font(14, Font.PLAIN, false, 0.08f);
         double x = rect.getX() + 15, top = rect.getY() + 15, nh = Ui.lineHeight(g, nf), th = Ui.lineHeight(g, tf), sh = Ui.lineHeight(g, sf);
         Ui.text(g, number, x, Ui.baseline(g, nf, top, nh), nf, Ui.DIM);
-        Ui.text(g, name, x, Ui.baseline(g, tf, top + nh + 6, th), tf, Ui.INK);
+        // 이름이 칸보다 길면(영어 등) 글자를 조금 줄여서 칸 안에 넣는다 (최소 13px)
+        Font fit = tf;
+        double room = rect.getWidth() - 30;
+        for (float size = 16.5f; Ui.width(g, name, fit) > room && size >= 13; size -= 0.5f) fit = Ui.font(size, Font.BOLD, false, 0);
+        Ui.text(g, name, x, Ui.baseline(g, tf, top + nh + 6, th), fit, Ui.INK);
         Ui.text(g, status, x, Ui.baseline(g, sf, rect.getMaxY() - 15 - sh, sh), sf, done ? Ui.AMBER : Ui.DIM);
         g.setTransform(before);
         g.setComposite(old);
