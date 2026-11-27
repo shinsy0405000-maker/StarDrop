@@ -38,7 +38,7 @@ jobs:
           [[ "$VERSION" =~ ^[0-9]+(\.[0-9]+){0,2}$ ]] || VERSION=1.0.0
           jpackage --type app-image --name StarDrop --input build/jar --main-jar StarDrop.jar --main-class StarDrop \
             --app-version "$VERSION" --vendor StarDrop --description "StarDrop - gravity delivery puzzle" \
-            --add-modules java.desktop,java.prefs --dest build/app
+            --add-modules java.desktop,java.prefs,java.net.http,jdk.crypto.ec --dest build/app
           cd build/app && 7z a ../StarDrop-windows.zip StarDrop
 
       - name: Release 에 파일 붙이기
