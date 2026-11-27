@@ -101,6 +101,26 @@ final class BugReport {
         dialog.setVisible(true);            // 창을 닫을 때까지 여기서 기다린다
     }
 
+    /** 지금 상황(버전, 언어, 화면, 운영체제 등)을 글로 적는다. 버그 제보 창의 "자동으로 붙는 정보" 칸에 들어간다 */
+    static String describe(StarDrop g) {
+        // 화면에 보이는 그대로 지금 언어로 적는다 ("언어" 줄이 있어서 개발자도 어떤 언어 화면인지 안다)
+        String where;
+        if (g.titleOpen) where = Lang.t("처음 화면");
+        else if (g.levelsOpen) where = Lang.f("구역 목록 (%s 단계)", Lang.t(Campaign.CHAPTERS[g.listChapter]));
+        else if (g.level == null) where = Lang.t("구역 불러오는 중");
+        else if (g.endless) where = Lang.f("무한 배달 No. %d", g.endlessSeed);
+        else where = Lang.f("%s 단계 %02d · %s (씨앗 %d)", Campaign.chapterName(g.levelIndex), Campaign.stageOf(g.levelIndex) + 1,
+                Lang.t(g.level.getName()), Campaign.seed(g.levelIndex));
+        return Lang.t("버전") + ": " + Lang.t("별똥 택배") + " " + Rules.VERSION
+                + "\n" + Lang.t("언어") + ": " + Lang.current().nativeName
+                + "\n" + Lang.t("화면") + ": " + where
+                + (g.level != null && !g.titleOpen && !g.levelsOpen ? "\n" + Lang.t("발사 횟수") + ": " + g.tries : "")
+                + "\n" + Lang.t("운영체제") + ": " + System.getProperty("os.name") + " " + System.getProperty("os.version")
+                + "\n" + Lang.t("자바") + ": " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")"
+                + "\n" + Lang.t("창 크기") + ": " + g.getWidth() + "×" + g.getHeight()
+                + String.format(", %s %.0f%%", Lang.t("화면 배율"), g.getGraphicsConfiguration() == null ? 100 : g.getGraphicsConfiguration().getDefaultTransform().getScaleX() * 100);
+    }
+
     /** GitHub "새 이슈" 주소. 양식(bug_report.yml)의 칸 이름(what, steps, env)으로 내용을 미리 채운다 */
     static String issueUrl(String what, String steps, String env) {
         String first = what.strip().lines().findFirst().orElse("");

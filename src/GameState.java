@@ -7,11 +7,16 @@ import java.util.Random;
 /**
  * 게임 화면이 가진 모든 상태(변수)를 모아 둔 맨 아래 층.
  *
- * 게임 본체는 기능별로 네 층으로 나뉘어 있고, 위 층은 아래 층을 상속해서 그대로 쓴다.
- *   GameState     상태 변수 (이 파일)
- *   WorldPainter  우주 화면 그리기: 배경, 천체, 별, 조준선, 소포
- *   ScreenPainter 화면 위 UI 그리기: HUD, 처음 화면, 구역 목록, 영수증
- *   StarDrop      게임 진행, 물리 한 스텝, 입력, main
+ * 게임 본체는 기능별로 층을 나눠, 위 층이 아래 층을 상속해서 변수와 기능을 그대로 쓴다 (아래 → 위):
+ *   GameState      상태 변수 (이 파일)
+ *   WorldPainter   우주 화면: 천체, 별, 조준선, 소포       (배경 한 장은 BackgroundPainter)
+ *   HudPainter     게임 화면 위 정보: 운송장, 도구 버튼, 연료, 안내
+ *   TitlePainter   처음 화면
+ *   PanelPainter   구역 목록, 배달 완료 영수증
+ *   ScreenPainter  한 프레임을 그리는 순서, 화면 효과
+ *   Flight         비행 진행: 발사, 물리 한 스텝, 도착·충돌
+ *   Controls       마우스·키보드 입력
+ *   StarDrop       화면 전환, 구역 불러오기, 창 열기, main
  * 버튼을 누르면 실행할 동작(다시 조준, 구역 목록 등)은 맨 위 StarDrop 이 만들고,
  * 아래 층에서는 abstract 로 이름만 정해 둔다.
  */
@@ -65,6 +70,8 @@ abstract class GameState extends JPanel {
     protected int fps, fpsFrames;
     protected double fpsTime;
     protected boolean showFps;
+    protected double fadeStart = -10;       // 새 구역이 나타난 시각 (검은 화면에서 밝아지는 효과)
+    protected boolean bloomOn = true;       // 빛 번짐 효과 (F4 로 끄고 켠다. 느린 컴퓨터용)
 
     // 화면 배치
     protected double viewScale = 1, viewX, viewY;                            // 게임 세계 → 화면

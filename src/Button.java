@@ -37,11 +37,35 @@ class Button extends Widget {
 
     @Override
     public void draw(Graphics2D g, double anim, double flightTime) {
-        Color bg = primary ? (hover ? Ui.AMBER_LIGHT : Ui.AMBER) : background;
-        Color border = primary ? Ui.AMBER : pressed ? Ui.MINT : hover ? Ui.AMBER : Ui.LINE;
-        Color ink = primary ? Ui.DARK_INK : pressed ? Ui.MINT : hover ? Ui.AMBER : Ui.INK;
+        // glow(0~1): 마우스를 올리면 부드럽게 1 이 된다 → 색이 바뀌고, 1.5px 떠오르고, 둘레에 빛이 번진다
+        double t = glow;
+        Color accent = pressed ? Ui.MINT : Ui.AMBER;
+        Color bg = primary ? Ui.mix(Ui.AMBER, Ui.AMBER_LIGHT, t) : Ui.mix(background, new Color(28, 26, 52, background.getAlpha()), t);
+        Color border = primary ? Ui.AMBER : pressed ? Ui.MINT : Ui.mix(Ui.LINE, Ui.AMBER, t);
+        Color ink = primary ? Ui.DARK_INK : pressed ? Ui.MINT : Ui.mix(Ui.INK, Ui.AMBER, t);
+        java.awt.geom.AffineTransform old = g.getTransform();
+        g.translate(0, -1.5 * t);
+        if (t > 0.01 || primary) {                         // 둘레의 빛 (노란 버튼은 늘 은은하게)
+            double strength = primary ? 0.35 + 0.65 * t : t;
+            for (int i = 1; i <= 4; i++) {
+                g.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), (int) (strength * 46 / i)));
+                g.setStroke(new BasicStroke(i * 2f));
+                g.draw(new Rectangle2D.Double(rect.getX() - i * 0.5, rect.getY() - i * 0.5, rect.getWidth() + i, rect.getHeight() + i));
+            }
+        }
         g.setColor(bg);
         g.fill(rect);
+        if (primary) {                                     // 노란 버튼: 몇 초마다 빛이 비스듬히 훑고 지나간다
+            double cycle = 3.4, run = 0.9, p = (anim + rect.getX() * 0.003) % cycle;
+            if (p < run) {
+                double bandW = rect.getHeight() * 1.2, bx = rect.getX() - bandW + (rect.getWidth() + bandW * 2) * (p / run);
+                java.awt.Shape clip = g.getClip();
+                g.clip(rect);
+                g.setPaint(new java.awt.GradientPaint((float) (bx - bandW / 2), 0, new Color(255, 255, 255, 0), (float) bx, 0, new Color(255, 255, 255, 110), true));
+                g.fill(new Rectangle2D.Double(bx - bandW / 2, rect.getY(), bandW, rect.getHeight()));
+                g.setClip(clip);
+            }
+        }
         g.setColor(border);
         g.setStroke(new BasicStroke(1f));
         g.draw(new Rectangle2D.Double(rect.getX() + 0.5, rect.getY() + 0.5, rect.getWidth() - 1, rect.getHeight() - 1));
@@ -50,5 +74,6 @@ class Button extends Widget {
         double x = rect.getCenterX() - (labelW + keyW) / 2, y = Ui.middle(g, f, rect);
         Ui.text(g, label, x, y, f, ink);
         if (key != null) Ui.text(g, key, x + labelW + 5, y, kf, Ui.DIM);
+        g.setTransform(old);
     }
 }

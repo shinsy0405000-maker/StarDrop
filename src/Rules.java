@@ -2,7 +2,7 @@
 final class Rules {
     private Rules() { }
 
-    static final String VERSION = "1.1.1";       // 배포 버전 (버그 제보에 함께 적힌다)
+    static final String VERSION = "1.2.0";       // 배포 버전 (버그 제보에 함께 적힌다)
 
     static final int W = 1600, H = 900;          // 게임 세계의 크기 (창 크기와 상관없이 고정)
     static final double DT = 0.01;               // 물리 계산 한 번에 흐르는 시간(초)

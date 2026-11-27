@@ -2,8 +2,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.RadialGradientPaint;
-import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
@@ -13,87 +11,17 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 우주 화면(게임 세계)을 그리는 층: 배경, 천체, 배달지, 별, 조준선, 소포와 꼬리 */
+/**
+ * 우주 화면(게임 세계)을 그리는 층: 천체, 배달지, 별, 조준선, 소포와 꼬리, 떠오르는 글자.
+ * 배경(성운, 먼 별, 격자)은 BackgroundPainter 가 한 장으로 그려 두고, 여기서는 그 위에 움직이는 것들을 그린다.
+ */
 abstract class WorldPainter extends GameState {
     private static final long serialVersionUID = 1L;
 
-    // ------------------------------------------------------------ 배경
-    /**
-     * 배경(색 그라데이션, 성운, 별, 휘어진 시공간 격자)을 지금 창 크기 그대로 한 장 그려 둔다.
-     * 웹처럼 게임 세계 바깥 여백까지 채우므로 창 비율이 달라도 검은 띠가 생기지 않는다.
-     */
+    // ------------------------------------------------------------ 배경 (그리는 법은 BackgroundPainter)
+    /** 배경을 지금 창 크기 그대로 한 장 그려 둔다. 구역이나 창 크기가 바뀔 때만 불린다 */
     protected BufferedImage makeBackground(Graphics2D screen, int w, int h) {
-        return ImageCache.screenLayer(screen, w, h, false, g -> paintBackground(g, w, h));
-    }
-
-    private void paintBackground(Graphics2D g, int w, int h) {
-        g.setPaint(new java.awt.LinearGradientPaint(0, 0, w * 0.3f, h, new float[]{0f, 0.55f, 1f},
-                new Color[]{new Color(6, 7, 22), new Color(10, 9, 32), new Color(19, 10, 36)}));
-        g.fillRect(0, 0, w, h);
-        if (level == null) return;
-        g.translate(viewX, viewY);
-        g.scale(viewScale, viewScale);
-        double vx0 = -viewX / viewScale, vy0 = -viewY / viewScale, vw = w / viewScale, vh = h / viewScale;
-
-        // 성운과 별: 웹과 같은 난수 순서로 그리고, 빛을 더하는 방식(lighter)으로 겹친다
-        Mulberry32 r = new Mulberry32((int) (level.getSeed() * 17 + 3));
-        double baseHue = level.getLookHue();
-        java.awt.Composite normal = g.getComposite();
-        g.setComposite(AdditiveComposite.INSTANCE);
-        for (int i = 0; i < 9; i++) {           // 성운
-            double x = vx0 + r.next() * vw, y = vy0 + r.next() * vh, rad = 180 + r.next() * 420, hue = baseHue + (r.next() - 0.5) * 90;
-            g.setPaint(new RadialGradientPaint((float) x, (float) y, (float) rad, new float[]{0f, 0.5f, 1f},
-                    new Color[]{hsla(hue, 75, 45, 0.07 + r.next() * 0.09), hsla(hue + 25, 70, 35, 0.04), new Color(0, 0, 0, 0)}));
-            g.fill(new Rectangle2D.Double(x - rad, y - rad, rad * 2, rad * 2));
-        }
-        for (int i = 0; i < 520; i++) {         // 별
-            double x = vx0 + r.next() * vw, y = vy0 + r.next() * vh, size = 0.3 + r.next() * r.next() * 1.5;
-            double hue = r.next() < 0.2 ? 30 + r.next() * 30 : 210 + r.next() * 40;
-            g.setColor(hsla(hue, r.next() * 60, 75 + r.next() * 25, 0.15 + r.next() * 0.75));
-            Paints.circle(g, x, y, size);
-        }
-        g.setComposite(normal);
-        // 휘어진 시공간 격자: 격자점을 천체 쪽으로(밀어내는 별은 바깥으로) 옮겨서 그린다
-        g.setColor(new Color(140, 165, 255, 22));
-        g.setStroke(new BasicStroke((float) (1 / viewScale)));
-        double[] p = new double[2];
-        int grid = 50;
-        double x0 = Math.floor(vx0 / grid) * grid, y0 = Math.floor(vy0 / grid) * grid;
-        for (double x = x0; x <= vx0 + vw + grid; x += grid) {
-            Path2D line = new Path2D.Double();
-            for (double y = y0; y <= vy0 + vh + grid; y += 10) {
-                warp(level, x, y, p);
-                if (y == y0) line.moveTo(p[0], p[1]); else line.lineTo(p[0], p[1]);
-            }
-            g.draw(line);
-        }
-        for (double y = y0; y <= vy0 + vh + grid; y += grid) {
-            Path2D line = new Path2D.Double();
-            for (double x = x0; x <= vx0 + vw + grid; x += 10) {
-                warp(level, x, y, p);
-                if (x == x0) line.moveTo(p[0], p[1]); else line.lineTo(p[0], p[1]);
-            }
-            g.draw(line);
-        }
-    }
-
-    /** CSS 의 hsla(색상, 채도%, 밝기%, 투명도 0~1) */
-    protected static Color hsla(double h, double s, double l, double a) {
-        return Paints.hsl(h, s / 100, l / 100, (int) Math.round(a * 255));
-    }
-
-    protected static void warp(Level lv, double x, double y, double[] out) {
-        double dx = 0, dy = 0;
-        for (int i = 0; i < lv.getBodyCount(); i++) {
-            if (!(lv.getBody(i) instanceof GravityBody)) continue;
-            GravityBody b = (GravityBody) lv.getBody(i);
-            double ex = b.getX() - x, ey = b.getY() - y, d2 = ex * ex + ey * ey + 400, d = Math.sqrt(d2);
-            double pull = b.getMass() / d2 * 0.009, size = Math.min(Math.abs(pull), Math.min(d * 0.45, 26));
-            dx += ex / d * (pull < 0 ? -size : size);
-            dy += ey / d * (pull < 0 ? -size : size);
-        }
-        out[0] = x + dx;
-        out[1] = y + dy;
+        return ImageCache.screenLayer(screen, w, h, false, g -> BackgroundPainter.paint(g, w, h, level, viewX, viewY, viewScale));
     }
 
     protected void drawWorld(Graphics2D g) {

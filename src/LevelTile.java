@@ -22,10 +22,18 @@ class LevelTile extends Widget {
     public void draw(Graphics2D g, double anim, double flightTime) {
         java.awt.Composite old = g.getComposite();
         if (!enabled) g.setComposite(AlphaComposite.SrcOver.derive(0.38f));
-        g.setColor(Ui.PANEL);
+        double t = enabled ? glow : 0;                    // 마우스를 올린 정도 → 떠오르고 노랗게 빛난다
+        java.awt.geom.AffineTransform before = g.getTransform();
+        g.translate(0, -2 * t);
+        for (int i = 1; i <= 4 && t > 0.01; i++) {
+            g.setColor(new java.awt.Color(255, 198, 92, (int) (t * 40 / i)));
+            g.setStroke(new BasicStroke(i * 2.5f));
+            g.draw(new Rectangle2D.Double(rect.getX() - i * 0.5, rect.getY() - i * 0.5, rect.getWidth() + i, rect.getHeight() + i));
+        }
+        g.setColor(Ui.mix(Ui.PANEL, new java.awt.Color(26, 24, 50), t));
         g.fill(rect);
-        boolean solid = hover && enabled;
-        g.setColor(solid ? Ui.AMBER : Ui.LINE);
+        boolean solid = t > 0.5;
+        g.setColor(Ui.mix(Ui.LINE, Ui.AMBER, t));
         g.setStroke(solid ? new BasicStroke(1f) : Ui.DASHED);
         g.draw(new Rectangle2D.Double(rect.getX() + 0.5, rect.getY() + 0.5, rect.getWidth() - 1, rect.getHeight() - 1));
         // CSS: 안쪽 여백 14, 번호(12px) → 6px 간격 → 이름(17px 굵게), 상태(14px)는 아래에 붙인다
@@ -34,6 +42,7 @@ class LevelTile extends Widget {
         Ui.text(g, number, x, Ui.baseline(g, nf, top, nh), nf, Ui.DIM);
         Ui.text(g, name, x, Ui.baseline(g, tf, top + nh + 6, th), tf, Ui.INK);
         Ui.text(g, status, x, Ui.baseline(g, sf, rect.getMaxY() - 15 - sh, sh), sf, done ? Ui.AMBER : Ui.DIM);
+        g.setTransform(before);
         g.setComposite(old);
     }
 }
