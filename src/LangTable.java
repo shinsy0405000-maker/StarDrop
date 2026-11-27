@@ -263,26 +263,38 @@ final class LangTable {
         add("2. 송금 메시지에 아래 기기 번호를 적어 주세요.", "2. Write the device number below in the transfer message.",
             "2. 送金メッセージに下の端末番号を書いてください。", "2. 请在转账留言中填写下面的设备编号。");
         add("복사", "Copy", "コピー", "复制");
-        add("3. GitHub에서 코드를 요청하면, 송금을 확인한 뒤 댓글로 코드를 보내 드려요.",
-            "3. Request a code on GitHub. Once the transfer is confirmed, the code will be posted as a comment.",
-            "3. GitHubでコードを申請すると、送金を確認したあとコメントでコードをお送りします。",
-            "3. 在GitHub上申请兑换码，确认转账后会在评论中发送兑换码。");
-        add("GitHub에서 코드 요청", "Request a Code on GitHub", "GitHubでコードを申請", "在GitHub申请兑换码");
-        add("받은 코드", "Your code", "受け取ったコード", "收到的兑换码");
         add("코드 넣기", "Redeem", "コードを入力", "兑换");
         add("코드는 이 컴퓨터에서만 열려요. 송금은 개발자가 직접 확인해서 조금 걸릴 수 있어요.",
             "Codes only work on this computer. Transfers are checked by hand, so it may take a while.",
             "コードはこのパソコンでのみ使えます。送金は開発者が手で確認するため、少し時間がかかることがあります。",
             "兑换码只能在这台电脑上使用。转账由开发者手动确认，可能需要一些时间。");
         add("기기 번호를 복사했어요.", "Device number copied.", "端末番号をコピーしました。", "设备编号已复制。");
-        add("브라우저를 열지 못해서 주소를 복사했어요.", "Couldn't open the browser, so the address was copied.",
-            "ブラウザを開けなかったので、アドレスをコピーしました。", "无法打开浏览器，已复制链接地址。");
         add("코드를 붙여 넣어 주세요.", "Please paste your code.", "コードを貼り付けてください。", "请粘贴兑换码。");
         add("맞지 않는 코드예요. 이 컴퓨터의 기기 번호로 받은 코드인지 확인해 주세요.",
             "That code doesn't match. Make sure it was issued for this computer's device number.",
             "コードが一致しません。このパソコンの端末番号で発行されたコードか確認してください。",
             "兑换码不匹配。请确认它是用这台电脑的设备编号申请的。");
         add("「%s」 스킨이 열렸어요! 고마워요.", "The \"%s\" skin is unlocked! Thank you.", "「%s」スキンが解放されました！ありがとうございます。", "「%s」皮肤已解锁！谢谢支持。");
+        add("3. 입금자명을 적고 코드 요청을 보내 주세요. 송금이 확인되면 스킨이 자동으로 열려요.",
+            "3. Enter the sender name and send a code request. The skin unlocks automatically once the transfer is confirmed.",
+            "3. 送金者名を入力してコードを申請してください。送金が確認されるとスキンが自動で解放されます。",
+            "3. 填写转账人姓名并发送兑换码申请。确认转账后皮肤会自动解锁。");
+        add("입금자명 (선택)", "Sender name (optional)", "送金者名（任意）", "转账人姓名（可选）");
+        add("코드 요청 보내기", "Send Code Request", "コードを申請", "发送兑换码申请");
+        add("지금 확인", "Check Now", "今すぐ確認", "立即检查");
+        add("코드를 따로 받았다면", "Got a code another way?", "コードを別に受け取った場合", "如果另外收到了兑换码");
+        add("송금 확인 중", "Checking transfer", "送金確認中", "正在确认转账");
+        add("코드 요청은 준비 중이에요.", "Code requests aren't available yet.", "コード申請は準備中です。", "兑换码申请功能准备中。");
+        add("요청을 받았어요. 송금이 확인되면 자동으로 열려요.", "Request received. The skin unlocks automatically once the transfer is confirmed.",
+            "申請を受け付けました。送金が確認されると自動で解放されます。", "已收到申请。确认转账后会自动解锁。");
+        add("송금을 찾지 못했어요. 송금한 뒤 다시 요청해 주세요.", "We couldn't find your transfer. Please send it and request again.",
+            "送金が見つかりませんでした。送金してからもう一度申請してください。", "未找到您的转账。请转账后重新申请。");
+        add("확인하는 중…", "Checking…", "確認中…", "正在检查…");
+        add("보내는 중…", "Sending…", "送信中…", "正在发送…");
+        add("서버에 연결하지 못했어요. 인터넷을 확인해 주세요.", "Couldn't reach the server. Please check your internet connection.",
+            "サーバーに接続できませんでした。インターネット接続を確認してください。", "无法连接服务器。请检查网络连接。");
+        add("새로 발급된 코드가 없어요.", "No new codes yet.", "新しく発行されたコードはありません。", "暂无新发放的兑换码。");
+        add("아직 송금을 확인하는 중이에요.", "Still checking your transfer.", "まだ送金を確認しています。", "仍在确认您的转账。");
         return table;
     }
 }

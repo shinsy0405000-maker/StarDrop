@@ -70,6 +70,32 @@ final class SkinStore {
         return null;
     }
 
+    /** 서버에서 받아 온 이 기기의 요청 상태 */
+    static final class Sync {
+        final java.util.List<Skin> unlocked = new java.util.ArrayList<>();       // 이번에 새로 열린 스킨
+        final java.util.Set<Skin> pending = java.util.EnumSet.noneOf(Skin.class);  // 개발자가 확인 중
+        final java.util.Set<Skin> rejected = java.util.EnumSet.noneOf(Skin.class); // 송금을 찾지 못해 거절됨
+    }
+
+    /**
+     * 서버(Supabase)에 이 기기 앞으로 발급된 코드가 있는지 보고, 있으면 넣는다. 인터넷이 필요해서 화면 스레드에서 부르지 않는다.
+     * @throws java.io.IOException 인터넷이 안 되거나 서버가 준비 안 됐을 때
+     */
+    static Sync sync() throws java.io.IOException {
+        Sync result = new Sync();
+        String device = device();
+        for (String[] row : SkinServer.status(device)) {
+            Skin s = Skin.byId(row[0]);
+            if (s == null || s.unlock != Skin.Unlock.PAID) continue;
+            boolean had = SkinCode.verify(s.id, device, savedCode(s));
+            if ("issued".equals(row[1]) && !had && redeem(row[2]) == s) result.unlocked.add(s);
+            else if ("pending".equals(row[1]) && !had) result.pending.add(s);
+            else if ("rejected".equals(row[1]) && !had) result.rejected.add(s);
+        }
+        result.rejected.removeAll(result.pending);       // 거절된 뒤 다시 요청했으면 "확인 중"
+        return result;
+    }
+
     // 저장 모양: "galaxy=코드;gold=코드"
     private static String savedCode(Skin skin) {
         try {
