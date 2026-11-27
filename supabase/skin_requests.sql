@@ -89,3 +89,41 @@ revoke execute on function public.skin_device(text), public.skin_request(text, t
   public.skin_admin_ok(text), public.skin_pending(text), public.skin_handle(text, bigint, text, text) from public, anon, authenticated;
 grant execute on function public.skin_request(text, text, text), public.skin_status(text),
   public.skin_pending(text), public.skin_handle(text, bigint, text, text) to anon, authenticated;
+
+-- ── 폰 알림 (ntfy) ─────────────────────────────────────────────
+-- 새 요청이 들어오면 개발자 폰으로 알림을 보낸다. 알림 토픽 이름은 skin_admin.ntfy_topic 에만 둔다 (여기 적지 않음).
+create extension if not exists pg_net;
+alter table public.skin_admin add column if not exists ntfy_topic text;
+alter table public.skin_admin add column if not exists admin_url text;
+
+create or replace function public.skin_request(p_device text, p_skin text, p_payer text default null) returns text
+language plpgsql security definer set search_path = public as $$
+declare
+  d text := skin_device(p_device);
+  a record;
+  payer text := nullif(left(btrim(coalesce(p_payer, '')), 40), '');
+begin
+  if exists (select 1 from skin_requests where device = d and skin = p_skin and status = 'issued') then return 'issued'; end if;
+  if exists (select 1 from skin_requests where device = d and skin = p_skin and status = 'pending') then return 'already'; end if;
+  insert into skin_requests (device, skin, payer) values (d, p_skin, payer);
+  begin
+    select ntfy_topic, admin_url into a from skin_admin where id = 1;
+    if a.ntfy_topic is not null then
+      perform net.http_post(
+        url := 'https://ntfy.sh',
+        body := jsonb_build_object(
+          'topic', a.ntfy_topic,
+          'title', '새 스킨 요청 · 5,000원',
+          'message', (case p_skin when 'gold' then '황금 택배' when 'galaxy' then '은하수 소포' else p_skin end)
+                     || E'\n입금자: ' || coalesce(payer, '(안 적음)') || E'\n기기: ' || d,
+          'click', a.admin_url,
+          'tags', jsonb_build_array('star')),
+        headers := '{"Content-Type": "application/json"}'::jsonb);
+    end if;
+  exception when others then
+    null;   -- 알림이 실패해도 요청은 저장된다
+  end;
+  return 'sent';
+end $$;
+revoke execute on function public.skin_request(text, text, text) from public;
+grant execute on function public.skin_request(text, text, text) to anon, authenticated;
