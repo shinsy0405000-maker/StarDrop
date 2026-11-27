@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>별똥 택배 · 스킨 요청</title>
+<style>
+  :root { --void:#070818; --panel:#0e0f26; --line:#34386a; --ink:#eceeff; --dim:#8f94bd; --amber:#ffc65c; --mint:#6ff2c4; --danger:#ff7d6b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--void); color: var(--ink); font: 16px/1.5 -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+         padding: max(20px, env(safe-area-inset-top)) 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--dim); font-size: 14px; margin: 0 0 18px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+  .skin { font-size: 18px; font-weight: 700; color: var(--amber); }
+  .row { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font-size: 15px; }
+  .row span:first-child { color: var(--dim); }
+  .mono { font-family: ui-monospace, Menlo, monospace; letter-spacing: .05em; }
+  .btns { display: flex; gap: 8px; margin-top: 14px; }
+  button { flex: 1; font: inherit; font-weight: 700; border-radius: 10px; padding: 13px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  button.go { background: var(--amber); border-color: var(--amber); color: #1b1304; }
+  button:disabled { opacity: .5; }
+  input { width: 100%; font: inherit; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--void); color: var(--ink); margin: 8px 0 12px; }
+  .msg { color: var(--mint); min-height: 1.5em; margin: 0 0 12px; font-size: 15px; }
+  .msg.bad { color: var(--danger); }
+  .empty { color: var(--dim); text-align: center; padding: 40px 0; }
+  .foot { color: var(--dim); font-size: 13px; margin-top: 24px; }
+  a { color: var(--dim); }
+</style>
+</head>
+<body>
+<h1>스킨 요청</h1>
+<p class="sub">카카오페이 입금 내역(입금자·5,000원)과 맞으면 <b>발급</b>을 누르세요.</p>
+<p class="msg" id="msg"></p>
+
+<div id="login" class="card" hidden>
+  <div>관리자 비밀번호</div>
+  <input id="pw" type="password" autocomplete="current-password" placeholder="코드 발급기 설정.txt 의 admin_secret">
+  <button class="go" id="save">저장</button>
+</div>
+
+<div id="list"></div>
+<button id="reload" hidden>새로고침</button>
+<p class="foot" id="foot" hidden><a href="#" id="logout">이 기기에서 비밀번호 지우기</a></p>
+
+<script>
+// 별똥 택배 스킨 요청 관리 페이지 (개발자 전용)
+// 비밀번호는 이 폰의 브라우저에만 저장되고, 서버(Supabase skin-admin 함수)가 맞는지 확인한다.
+const API = "https://uprvuccixlnloqnwyakw.supabase.co/functions/v1/skin-admin";
+const NAMES = { gold: "황금 택배", galaxy: "은하수 소포" };
+const $ = (id) => document.getElementById(id);
+let secret = "";
+
+function store(key, value) { try { value === null ? localStorage.removeItem(key) : localStorage.setItem(key, value); } catch (e) { /* 저장 못 해도 이번엔 쓴다 */ } }
+function load(key) { try { return localStorage.getItem(key) || ""; } catch (e) { return ""; } }
+function say(text, bad) { $("msg").textContent = text; $("msg").className = bad ? "msg bad" : "msg"; }
+
+// 코드 발급기가 보낸 "폰 연결" 링크: admin.html#s=비밀번호 → 저장하고 주소에서 지운다
+if (location.hash.startsWith("#s=")) {
+  store("stardrop_admin", decodeURIComponent(location.hash.slice(3)));
+  history.replaceState(null, "", location.pathname);
+}
+secret = load("stardrop_admin");
+
+async function call(action, id) {
+  const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ secret, action, id }) });
+  const data = await r.json().catch(() => ({ error: "서버 응답을 읽지 못했어요" }));
+  if (!r.ok) { const e = new Error(data.error || ("오류 " + r.status)); e.status = r.status; throw e; }
+  return data;
+}
+
+function when(iso) {
+  return new Date(iso).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function showLogin() {
+  $("login").hidden = false; $("list").innerHTML = ""; $("reload").hidden = true; $("foot").hidden = true;
+}
+
+async function refresh() {
+  if (!secret) { showLogin(); return; }
+  $("login").hidden = true; $("reload").hidden = false; $("foot").hidden = false;
+  try {
+    const { pending } = await call("list");
+    const list = $("list");
+    list.innerHTML = "";
+    if (!pending.length) { list.innerHTML = '<div class="empty">확인할 요청이 없어요</div>'; return; }
+    for (const r of pending) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<div class="skin"></div>
+        <div class="row"><span>입금자</span><span class="payer"></span></div>
+        <div class="row"><span>금액</span><span>5,000원</span></div>
+        <div class="row"><span>기기 번호</span><span class="mono dev"></span></div>
+        <div class="row"><span>요청</span><span class="at"></span></div>
+        <div class="btns"><button class="no">거절</button><button class="go">발급</button></div>`;
+      card.querySelector(".skin").textContent = NAMES[r.skin] || r.skin;
+      card.querySelector(".payer").textContent = r.payer || "(안 적음)";
+      card.querySelector(".dev").textContent = r.device;
+      card.querySelector(".at").textContent = when(r.created_at);
+      const [no, go] = card.querySelectorAll("button");
+      go.onclick = () => act(card, "issue", r, [no, go]);
+      no.onclick = () => { if (confirm("송금을 찾지 못해 거절할까요?")) act(card, "reject", r, [no, go]); };
+      list.appendChild(card);
+    }
+    say("");
+  } catch (e) {
+    if (e.status === 401) { secret = ""; store("stardrop_admin", null); showLogin(); say("비밀번호가 틀렸어요. 다시 입력해 주세요.", true); }
+    else say("불러오지 못했어요: " + e.message, true);
+  }
+}
+
+async function act(card, action, r, buttons) {
+  buttons.forEach((b) => b.disabled = true);
+  try {
+    await call(action, r.id);
+    say(action === "issue" ? `발급했어요: ${NAMES[r.skin] || r.skin} (${r.payer || r.device}). 그 사람 게임에서 자동으로 열려요.` : "거절했어요.");
+    card.remove();
+    if (!$("list").children.length) $("list").innerHTML = '<div class="empty">확인할 요청이 없어요</div>';
+  } catch (e) {
+    say("실패했어요: " + e.message, true);
+    buttons.forEach((b) => b.disabled = false);
+  }
+}
+
+$("save").onclick = () => { secret = $("pw").value.trim(); store("stardrop_admin", secret); $("pw").value = ""; refresh(); };
+$("reload").onclick = refresh;
+$("logout").onclick = (e) => { e.preventDefault(); secret = ""; store("stardrop_admin", null); showLogin(); say("지웠어요."); };
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+refresh();
+</script>
+</body>
+</html>
