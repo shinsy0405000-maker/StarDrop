@@ -51,7 +51,10 @@
 코드는 개발자만 가진 비밀 열쇠로 만든 전자 서명(Ed25519)이라 지어낼 수 없고, 기기 번호가 들어 있어서 그 컴퓨터에서만 열립니다.
 게임에는 확인용 열쇠(공개키)와 Supabase 공개용 열쇠만 들어 있어서 소스 코드가 공개돼 있어도 괜찮습니다.
 서버는 `supabase/skin_requests.sql`: 게임은 "요청 넣기"와 "내 기기 상태 보기" 두 함수만 부를 수 있고, 요청 표를 직접 읽거나 고칠 수는 없습니다.
-발급·거절은 관리자 비밀번호가 있는 개발자용 코드 발급기(저장소에는 없음)로만 할 수 있습니다.
+발급·거절은 관리자 비밀번호가 있어야 할 수 있습니다:
+- **폰**: 새 요청이 오면 개발자 아이폰에 알림(ntfy)이 오고, 누르면 관리 페이지(`docs/admin.html`, GitHub Pages)에서 [발급]만 누르면 됨.
+  코드 서명은 Supabase 함수(`supabase/functions/skin-admin`)가 하고, 서명용 개인키는 Supabase 비밀값에만 있음
+- **컴퓨터**: 개발자용 코드 발급기(저장소에는 없음)
 나중에 업적 시스템이 생기면 업적 보상으로 받는 스킨도 넣을 예정입니다 (`Skin.Unlock.ACHIEVEMENT` 자리를 만들어 둠).
 
 ## 후원
@@ -193,7 +196,9 @@ src/
   LanguagePicker.java  언어 고르는 창
   fonts/               웹과 같은 글꼴 (Black Han Sans, IBM Plex Sans KR, IBM Plex Mono — SIL Open Font License, OFL-*.txt)
 .github/ISSUE_TEMPLATE/bug_report.yml   GitHub 버그 제보 양식
-supabase/skin_requests.sql             스킨 코드 요청 서버(Supabase) 표와 함수
+supabase/skin_requests.sql             스킨 코드 요청 서버(Supabase) 표와 함수, 새 요청 폰 알림
+supabase/functions/skin-admin/         관리 페이지가 부르는 서버 함수 (요청 목록, 발급·거절, 코드 서명)
+docs/admin.html                        개발자 폰용 스킨 요청 관리 페이지 (GitHub Pages)
 .github/FUNDING.yml                    저장소 Sponsor 버튼 → 후원 페이지
 DONATE.md              후원 페이지 (카카오페이 송금 QR)
 .github/workflows/release.yml          배포: Release를 발행하면 jar와 윈도우 실행 파일을 자동으로 만듦
@@ -212,6 +217,7 @@ web/index.html         처음에 만든 웹 버전 (브라우저로 열면 실�
   - 유료 스킨: 카카오페이 송금 → 게임에서 코드 요청(Supabase) → 개발자가 발급하면 자동으로 열림. 계정 필요 없음
     - 처음엔 GitHub 이슈로 요청받게 했는데, 구매자에게 GitHub 계정이 필요해서 Supabase 로 바꿈
     - 코드는 기기 번호에 묶인 전자 서명이라 다른 컴퓨터에서는 안 열림
+    - 개발자는 아이폰으로 처리: 새 요청 알림(ntfy) → 카카오페이 입금 확인 → 관리 페이지에서 [발급]
   - 윈도우 실행 파일에 빠져 있던 자바 모듈(`jdk.crypto.ec` 전자 서명·보안 연결, `java.net.http` 인터넷)을 넣음 — 없으면 맞는 코드도 안 열렸음
   - 기본 스킨은 예전과 픽셀까지 똑같이 그림 (조준 · 비행 · 배달 완료 화면 비교)
 - **버전 규칙**을 정함 (위 "버전 규칙" 참고): 작은 수정은 맨 뒤, 중간 업데이트는 가운데, 콜라보 테마·새 스테이지는 맨 앞
